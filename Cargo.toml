@@ -1,0 +1,28 @@
+[package]
+name = "aoc2023"
+authors.workspace = true
+version.workspace = true
+edition.workspace = true
+
+[workspace]
+members = ["crates/*"]
+
+[workspace.package]
+authors = ["Medea"]
+version = "0.1.0"
+edition = "2021"
+
+[workspace.dependencies]
+itertools = "0.12"
+nalgebra = "0.32"
+nom = "7.0"
+rayon = "1.8"
+tracing = "0.1"
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[dependencies]
+aoc2023-template = { path = "crates/template" }
+clap = { version = "4.4", features = ["derive"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

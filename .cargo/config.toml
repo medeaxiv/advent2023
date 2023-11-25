@@ -1,0 +1,2 @@
+[env]
+AOC2023_LOG = "error,aoc2023=trace"
