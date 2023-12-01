@@ -35,14 +35,14 @@ pub fn part2(_shared: Shared) -> impl std::fmt::Display {
 }
 
 fn solve_p2(input: &str) -> u32 {
-    let re = Regex::new(r"([0-9]|one|two|three|four|five|six|seven|eight|nine)").unwrap();
+    let re = Regex::new(r"^([0-9]|one|two|three|four|five|six|seven|eight|nine)").unwrap();
     input
         .lines()
         .filter_map(|line| {
             let mut first = None;
             let mut last = None;
             for start_idx in 0..line.len() {
-                if let Some(capture) = re.captures_at(line, start_idx) {
+                if let Some(capture) = re.captures(&line[start_idx..]) {
                     first = first.or(capture.get(1).map(|m| m.as_str()));
                     last = capture.get(1).map(|m| m.as_str());
                 }
