@@ -1,0 +1,13 @@
+[package]
+name = "aoc2023-01"
+authors.workspace = true
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+itertools.workspace = true
+nalgebra.workspace = true
+nom.workspace = true
+rayon.workspace = true
+regex.workspace = true
+tracing.workspace = true

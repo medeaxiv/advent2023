@@ -33,6 +33,11 @@ fn run_puzzle(puzzle: u32) -> Option<Duration> {
             aoc2023_template::part1,
             aoc2023_template::part2,
         )),
+        1 => Some(call_puzzle_parts(
+            puzzle,
+            aoc2023_01::part1,
+            aoc2023_01::part2,
+        )),
         _ => None,
     }
 }

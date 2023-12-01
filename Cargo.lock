@@ -63,9 +63,22 @@ dependencies = [
 name = "aoc2023"
 version = "0.1.0"
 dependencies = [
+ "aoc2023-01",
  "aoc2023-template",
  "clap",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "aoc2023-01"
+version = "0.1.0"
+dependencies = [
+ "itertools",
+ "nalgebra",
+ "nom",
+ "rayon",
+ "regex",
+ "tracing",
 ]
 
 [[package]]
