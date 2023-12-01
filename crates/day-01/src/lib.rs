@@ -11,23 +11,14 @@ pub fn part1() -> (impl std::fmt::Display, Shared) {
 fn solve_p1(input: &str) -> u32 {
     input
         .lines()
-        .filter_map(|line| {
-            let mut first = None;
-            let mut last = None;
-            for c in line.chars().filter(|c| c.is_ascii_digit()) {
-                first = first.or(Some(c));
-                last = Some(c);
-            }
-
-            first.and_then(|first| last.map(|last| (first, last)))
+        .map(|line| {
+            let mut digits = line.chars().filter_map(|c| c.to_digit(10));
+            let first = digits.next().unwrap();
+            let last = digits.last().unwrap_or(first);
+            (first, last)
         })
-        .map(|(a, b)| int_val(a) * 10 + int_val(b))
+        .map(|(a, b)| a * 10 + b)
         .sum()
-}
-
-fn int_val(c: char) -> u32 {
-    assert!(c.is_ascii_digit());
-    c as u32 - '0' as u32
 }
 
 pub fn part2(_shared: Shared) -> impl std::fmt::Display {
@@ -38,22 +29,21 @@ fn solve_p2(input: &str) -> u32 {
     let re = Regex::new(r"^([0-9]|one|two|three|four|five|six|seven|eight|nine)").unwrap();
     input
         .lines()
-        .filter_map(|line| {
-            let mut first = None;
-            let mut last = None;
-            for start_idx in 0..line.len() {
-                if let Some(capture) = re.captures(&line[start_idx..]) {
-                    first = first.or(capture.get(1).map(|m| m.as_str()));
-                    last = capture.get(1).map(|m| m.as_str());
-                }
-            }
+        .map(|line| {
+            let mut digits = (0..line.len())
+                .map(|offset| &line[offset..])
+                .filter_map(|slice| re.captures(slice)?.get(1).map(|m| m.as_str()))
+                .map(digit);
 
-            first.and_then(|first| last.map(|last| int_val2(first) * 10 + int_val2(last)))
+            let first = digits.next().unwrap();
+            let last = digits.last().unwrap_or(first);
+            (first, last)
         })
+        .map(|(a, b)| a * 10 + b)
         .sum()
 }
 
-fn int_val2(s: &str) -> u32 {
+fn digit(s: &str) -> u32 {
     match s {
         "0" => 0,
         "one" | "1" => 1,
