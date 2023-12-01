@@ -11,3 +11,6 @@ nom.workspace = true
 rayon.workspace = true
 regex.workspace = true
 tracing.workspace = true
+
+[dev-dependencies]
+rstest.workspace = true

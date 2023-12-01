@@ -2,13 +2,11 @@ use regex::Regex;
 
 const INPUT: &str = include_str!("input.txt");
 
-pub struct Shared;
-
-pub fn part1() -> (impl std::fmt::Display, Shared) {
-    (solve_p1(INPUT), Shared)
+pub fn part1() -> impl std::fmt::Display {
+    solve_part1(INPUT)
 }
 
-fn solve_p1(input: &str) -> u32 {
+fn solve_part1(input: &str) -> u32 {
     input
         .lines()
         .map(|line| {
@@ -21,11 +19,11 @@ fn solve_p1(input: &str) -> u32 {
         .sum()
 }
 
-pub fn part2(_shared: Shared) -> impl std::fmt::Display {
-    solve_p2(INPUT)
+pub fn part2() -> impl std::fmt::Display {
+    solve_part2(INPUT)
 }
 
-fn solve_p2(input: &str) -> u32 {
+fn solve_part2(input: &str) -> u32 {
     let re = Regex::new(r"^([0-9]|one|two|three|four|five|six|seven|eight|nine)").unwrap();
     input
         .lines()
@@ -80,13 +78,13 @@ zoneight234
 
     #[test]
     fn test_part1() {
-        let solution = solve_p1(TEST_INPUT1);
+        let solution = solve_part1(TEST_INPUT1);
         assert_eq!(solution, 142);
     }
 
     #[test]
     fn test_part2() {
-        let solution = solve_p2(TEST_INPUT2);
+        let solution = solve_part2(TEST_INPUT2);
         assert_eq!(solution, 281);
     }
 }

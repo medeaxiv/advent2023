@@ -4,64 +4,96 @@ use clap::Parser;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
 fn main() -> Result<(), String> {
+    trace();
+
     let args = Args::parse();
+    let parts = match args.part {
+        Some(1) => [true, false],
+        Some(2) => [false, true],
+        None => [true, true],
+        _ => [false, false],
+    };
+
+    let puzzles = [
+        Puzzle {
+            puzzle: 0,
+            p1: measure(aoc2023_template::part1),
+            p2: measure(aoc2023_template::part2),
+        },
+        Puzzle {
+            puzzle: 1,
+            p1: measure(aoc2023_01::part1),
+            p2: measure(aoc2023_01::part2),
+        },
+    ];
 
     if let Some(puzzle) = args.puzzle {
-        run_one(puzzle)
+        run_one(puzzle, &puzzles, parts)
     } else {
-        run_all();
+        run_all(&puzzles, parts);
         Ok(())
     }
 }
 
-fn run_all() {
-    let total_time: Duration = (1..=25).map_while(run_puzzle).sum();
+fn run_all(puzzles: &[Puzzle], parts: [bool; 2]) {
+    let total_time: Duration = puzzles[1..].iter().map(|p| p.run(parts)).sum();
     println!("Total solve time: {}", DurationFormatter(total_time));
 }
 
-fn run_one(puzzle: u32) -> Result<(), String> {
-    let total_time = run_puzzle(puzzle).ok_or_else(|| format!("No puzzle {puzzle}"))?;
+fn run_one(puzzle: u32, puzzles: &[Puzzle], parts: [bool; 2]) -> Result<(), String> {
+    let puzzle = puzzles
+        .get(puzzle as usize)
+        .ok_or_else(|| format!("No puzzle {puzzle}"))?;
+
+    let total_time = puzzle.run(parts);
     println!("Total solve time: {}", DurationFormatter(total_time));
 
     Ok(())
-}
-
-fn run_puzzle(puzzle: u32) -> Option<Duration> {
-    match puzzle {
-        0 => Some(call_puzzle_parts(
-            puzzle,
-            aoc2023_template::part1,
-            aoc2023_template::part2,
-        )),
-        1 => Some(call_puzzle_parts(
-            puzzle,
-            aoc2023_01::part1,
-            aoc2023_01::part2,
-        )),
-        _ => None,
-    }
-}
-
-fn call_puzzle_parts<R1, R2, S>(
-    puzzle: u32,
-    p1: impl FnOnce() -> (R1, S),
-    p2: impl FnOnce(S) -> R2,
-) -> Duration
-where
-    R1: std::fmt::Display,
-    R2: std::fmt::Display,
-{
-    let (d1, (r1, shared)) = measure(p1);
-    println!("Day {puzzle} Part 1 ({}): {r1}", DurationFormatter(d1));
-    let (d2, r2) = measure(|| p2(shared));
-    println!("Day {puzzle} Part 2 ({}): {r2}", DurationFormatter(d2));
-    d1 + d2
 }
 
 #[derive(Parser)]
 struct Args {
     /// Optional puzzle to run
     puzzle: Option<u32>,
+    /// Optional part to run
+    #[arg(short, long)]
+    part: Option<u32>,
+}
+
+struct Puzzle {
+    puzzle: u32,
+    p1: Box<dyn Fn() -> (Duration, String)>,
+    p2: Box<dyn Fn() -> (Duration, String)>,
+}
+
+impl Puzzle {
+    fn run(&self, parts: [bool; 2]) -> Duration {
+        let d1 = if parts[0] {
+            self.run_part(1, &self.p1)
+        } else {
+            Duration::ZERO
+        };
+
+        let d2 = if parts[1] {
+            self.run_part(2, &self.p2)
+        } else {
+            Duration::ZERO
+        };
+
+        d1 + d2
+    }
+
+    fn run_part(&self, part: u32, func: &dyn Fn() -> (Duration, String)) -> Duration {
+        let (d, r) = func();
+
+        println!(
+            "Day {:02} part {part} ({}): {r}",
+            self.puzzle,
+            DurationFormatter(d)
+        );
+
+        d
+    }
 }
 
 pub fn trace() {
@@ -71,11 +103,16 @@ pub fn trace() {
         .init();
 }
 
-pub fn measure<R>(function: impl FnOnce() -> R) -> (Duration, R) {
-    let start = Instant::now();
-    let result = function();
-    let duration = start.elapsed();
-    (duration, result)
+pub fn measure<R>(function: impl Fn() -> R + 'static) -> Box<dyn Fn() -> (Duration, String)>
+where
+    R: std::fmt::Display,
+{
+    Box::new(move || {
+        let start = Instant::now();
+        let result = function();
+        let duration = start.elapsed();
+        (duration, result.to_string())
+    })
 }
 
 pub struct DurationFormatter(pub Duration);
