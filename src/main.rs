@@ -25,6 +25,11 @@ fn main() -> Result<(), String> {
             p1: measure(aoc2023_01::part1),
             p2: measure(aoc2023_01::part2),
         },
+        Puzzle {
+            puzzle: 2,
+            p1: measure(aoc2023_02::part1),
+            p2: measure(aoc2023_02::part2),
+        },
     ];
 
     if let Some(puzzle) = args.puzzle {

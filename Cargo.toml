@@ -30,5 +30,6 @@ opt-level = 3
 [dependencies]
 aoc2023-template = { path = "crates/template" }
 aoc2023-01 = { path = "crates/day-01" }
+aoc2023-02 = { path = "crates/day-02" }
 clap = { version = "4.4", features = ["derive"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
