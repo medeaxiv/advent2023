@@ -16,10 +16,9 @@ fn parse(line: &str) -> Game {
         .map(|part| {
             part.split(", ")
                 .map(|entry| {
-                    entry
-                        .split_once(' ')
-                        .map(|(c, color)| (color.to_string(), c.parse::<u32>().unwrap()))
-                        .unwrap()
+                    let (count, color) = entry.split_once(' ').unwrap();
+                    let count = count.parse::<u32>().unwrap();
+                    (color.to_string(), count)
                 })
                 .collect_vec()
         })
