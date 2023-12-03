@@ -14,26 +14,28 @@ fn main() -> Result<(), String> {
         _ => [false, false],
     };
 
+    let rounds = args.rounds;
+
     let puzzles = [
         Puzzle {
             puzzle: 0,
-            p1: measure(aoc2023_template::part1),
-            p2: measure(aoc2023_template::part2),
+            p1: measure(aoc2023_template::part1, rounds),
+            p2: measure(aoc2023_template::part2, rounds),
         },
         Puzzle {
             puzzle: 1,
-            p1: measure(aoc2023_01::part1),
-            p2: measure(aoc2023_01::part2),
+            p1: measure(aoc2023_01::part1, rounds),
+            p2: measure(aoc2023_01::part2, rounds),
         },
         Puzzle {
             puzzle: 2,
-            p1: measure(aoc2023_02::part1),
-            p2: measure(aoc2023_02::part2),
+            p1: measure(aoc2023_02::part1, rounds),
+            p2: measure(aoc2023_02::part2, rounds),
         },
         Puzzle {
             puzzle: 3,
-            p1: measure(aoc2023_03::part1),
-            p2: measure(aoc2023_03::part2),
+            p1: measure(aoc2023_03::part1, rounds),
+            p2: measure(aoc2023_03::part2, rounds),
         },
     ];
 
@@ -68,6 +70,8 @@ struct Args {
     /// Optional part to run
     #[arg(short, long)]
     part: Option<u32>,
+    #[arg(short = 'r', long = "rounds", default_value_t = 1)]
+    rounds: u32,
 }
 
 struct Puzzle {
@@ -113,16 +117,42 @@ pub fn trace() {
         .init();
 }
 
-pub fn measure<R>(function: impl Fn() -> R + 'static) -> Box<dyn Fn() -> (Duration, String)>
+pub fn measure<R>(
+    function: impl Fn() -> R + 'static,
+    rounds: u32,
+) -> Box<dyn Fn() -> (Duration, String)>
 where
     R: std::fmt::Display,
 {
-    Box::new(move || {
-        let start = Instant::now();
-        let result = function();
-        let duration = start.elapsed();
-        (duration, result.to_string())
-    })
+    if rounds <= 1 {
+        Box::new(move || {
+            let start = Instant::now();
+            let result = function();
+            let duration = start.elapsed();
+            (duration, result.to_string())
+        })
+    } else {
+        Box::new(move || {
+            let mut accumulator = Vec::with_capacity(rounds as usize);
+
+            let mut result = None;
+
+            for _ in 0..rounds {
+                let start = Instant::now();
+                let round_result = function();
+                let duration = start.elapsed();
+                accumulator.push(duration);
+
+                if result.is_none() {
+                    result = Some(round_result);
+                }
+            }
+
+            let duration = accumulator.iter().sum::<Duration>() / rounds;
+
+            (duration, result.unwrap().to_string())
+        })
+    }
 }
 
 pub struct DurationFormatter(pub Duration);
