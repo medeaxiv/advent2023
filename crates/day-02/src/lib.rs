@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use itertools::Itertools;
+use rayon::{iter::ParallelIterator, str::ParallelString};
 
 const INPUT: &str = include_str!("input.txt");
 
@@ -30,7 +31,7 @@ fn solve_part1(input: &str) -> u32 {
     let maximums: HashMap<&str, u32> = HashMap::from([("red", 12), ("green", 13), ("blue", 14)]);
 
     input
-        .lines()
+        .par_lines()
         .map(parse)
         .filter(|game| {
             for (color, count) in game.sets.iter().flat_map(|set| set.iter()) {
@@ -51,7 +52,7 @@ pub fn part2() -> impl std::fmt::Display {
 
 fn solve_part2(input: &str) -> u32 {
     input
-        .lines()
+        .par_lines()
         .map(parse)
         .map(|game| {
             let mut maximums: HashMap<&str, u32> = HashMap::new();
