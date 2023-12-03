@@ -1,4 +1,5 @@
 use nalgebra::{vector, Vector2};
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 const INPUT: &str = include_str!("input.txt");
 
@@ -11,7 +12,7 @@ fn solve_part1(input: &str) -> u32 {
 
     schematic
         .numbers
-        .iter()
+        .par_iter()
         .filter(|(pos, slice, _)| {
             let y_range = (pos.y.saturating_sub(1))..=(pos.y + 1);
             let x_range = (pos.x.saturating_sub(1))..=(pos.x + slice.len());
@@ -33,7 +34,7 @@ fn solve_part2(input: &str) -> u32 {
 
     schematic
         .symbols
-        .iter()
+        .par_iter()
         .filter(|(_, symbol)| *symbol == "*")
         .filter_map(|(gear_pos, _)| {
             let (count, ratio) = schematic
