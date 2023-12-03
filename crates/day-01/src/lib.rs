@@ -1,3 +1,4 @@
+use rayon::{iter::ParallelIterator, str::ParallelString};
 use regex::Regex;
 
 const INPUT: &str = include_str!("input.txt");
@@ -26,7 +27,7 @@ pub fn part2() -> impl std::fmt::Display {
 fn solve_part2(input: &str) -> u32 {
     let re = Regex::new(r"^([0-9]|one|two|three|four|five|six|seven|eight|nine)").unwrap();
     input
-        .lines()
+        .par_lines()
         .map(|line| {
             let mut digits = (0..line.len())
                 .map(|offset| &line[offset..])
