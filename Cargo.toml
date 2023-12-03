@@ -15,7 +15,9 @@ edition = "2021"
 [workspace.dependencies]
 itertools = "0.12"
 nalgebra = "0.32"
-nom = "7.0"
+nom = "7.1"
+nom_locate = "4.2"
+nom-supreme = "0.8"
 rayon = "1.8"
 regex = "1.10"
 rstest = "0.18"
@@ -33,5 +35,6 @@ opt-level = 3
 aoc2023-template = { path = "crates/template" }
 aoc2023-01 = { path = "crates/day-01" }
 aoc2023-02 = { path = "crates/day-02" }
+aoc2023-03 = { path = "crates/day-03" }
 clap = { version = "4.4", features = ["derive"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
