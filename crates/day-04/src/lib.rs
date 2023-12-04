@@ -9,6 +9,7 @@ use nom::{
     sequence::{preceded, separated_pair, tuple},
     IResult,
 };
+use nom_supreme::final_parser::final_parser;
 
 const INPUT: &str = include_str!("input.txt");
 
@@ -19,7 +20,7 @@ pub fn part1() -> impl std::fmt::Display {
 fn solve_part1(input: &str) -> u32 {
     input
         .lines()
-        .map(|line| parse(line).unwrap().1)
+        .map(|line| parse(line).unwrap())
         .map(|card| card.score())
         .sum()
 }
@@ -31,7 +32,7 @@ pub fn part2() -> impl std::fmt::Display {
 fn solve_part2(input: &str) -> u32 {
     let dependencies = input
         .lines()
-        .map(|line| parse(line).unwrap().1)
+        .map(|line| parse(line).unwrap())
         .map(|card| card.winning_number_count())
         .enumerate()
         .map(|(idx, count)| ((idx + 1)..=(idx + count as usize)).collect_vec())
@@ -83,7 +84,7 @@ impl Card {
     }
 }
 
-fn parse(input: &str) -> IResult<&str, Card> {
+fn parse(input: &str) -> Result<Card, nom::error::Error<&str>> {
     fn number_parser(input: &str) -> IResult<&str, u32> {
         preceded(space1, complete::u32)(input)
     }
@@ -93,12 +94,15 @@ fn parse(input: &str) -> IResult<&str, Card> {
     }
 
     let id_parser = preceded(tag("Card"), number_parser);
-    let card_parser = preceded(
-        tuple((id_parser, tag(":"))),
-        separated_pair(numbers_parser, tag(" |"), numbers_parser),
+    let card_parser = map(
+        preceded(
+            tuple((id_parser, tag(":"))),
+            separated_pair(numbers_parser, tag(" |"), numbers_parser),
+        ),
+        |(winning, numbers)| Card { winning, numbers },
     );
 
-    map(card_parser, |(winning, numbers)| Card { winning, numbers })(input)
+    final_parser(card_parser)(input)
 }
 
 #[cfg(test)]
@@ -129,7 +133,7 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
     #[case("Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36", 0)]
     #[case("Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11", 0)]
     fn score_part1(#[case] card: &str, #[case] expected: u32) {
-        let card = parse(card).unwrap().1;
+        let card = parse(card).unwrap();
         let score = card.score();
         assert_eq!(score, expected);
     }
