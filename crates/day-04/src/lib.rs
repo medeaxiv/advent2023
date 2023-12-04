@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 
 use itertools::Itertools;
 use nom::{
@@ -37,9 +37,9 @@ fn solve_part2(input: &str) -> u32 {
         .map(|(idx, count)| ((idx + 1)..=(idx + count as usize)).collect_vec())
         .collect_vec();
 
-    fn count(idx: usize, dependencies: &Vec<Vec<usize>>, cache: &mut BTreeMap<usize, u32>) -> u32 {
-        if let Some(count) = cache.get(&idx) {
-            return *count;
+    fn count(idx: usize, dependencies: &Vec<Vec<usize>>, cache: &mut Vec<u32>) -> u32 {
+        if cache[idx] > 0 {
+            return cache[idx];
         }
 
         let count = dependencies
@@ -48,12 +48,12 @@ fn solve_part2(input: &str) -> u32 {
             .iter()
             .map(|idx| count(*idx, dependencies, cache))
             .fold(1, |count, el| count + el);
-        cache.insert(idx, count);
+        cache[idx] = count;
 
         count
     }
 
-    let mut cache = BTreeMap::new();
+    let mut cache = vec![0; dependencies.len()];
     (0..dependencies.len())
         .map(|idx| count(idx, &dependencies, &mut cache))
         .sum()
