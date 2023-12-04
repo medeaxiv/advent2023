@@ -87,6 +87,7 @@ struct Args {
     /// Optional part to run
     #[arg(short, long)]
     part: Option<u32>,
+    /// Benchmarking rounds
     #[arg(short = 'r', long = "rounds", default_value_t = 1)]
     rounds: u32,
 }
