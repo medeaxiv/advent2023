@@ -32,6 +32,8 @@ opt-level = 0
 opt-level = 3
 
 [dependencies]
+anyhow.workspace = true
+thiserror.workspace = true
 aoc2023-template = { path = "crates/template" }
 aoc2023-01 = { path = "crates/day-01" }
 aoc2023-02 = { path = "crates/day-02" }

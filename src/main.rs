@@ -3,7 +3,7 @@ use std::time::{Duration, Instant};
 use clap::Parser;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
-fn main() -> Result<(), String> {
+fn main() -> anyhow::Result<()> {
     trace();
 
     let args = Args::parse();
@@ -44,28 +44,40 @@ fn main() -> Result<(), String> {
         },
     ];
 
-    if let Some(puzzle) = args.puzzle {
-        run_one(puzzle, &puzzles, parts)
+    let start = Instant::now();
+    let sum_of_means = if let Some(puzzle) = args.puzzle {
+        run_one(puzzle, &puzzles, parts)?
     } else {
-        run_all(&puzzles, parts);
-        Ok(())
-    }
-}
+        run_all(&puzzles, parts)
+    };
+    let total = start.elapsed();
 
-fn run_all(puzzles: &[Puzzle], parts: [bool; 2]) {
-    let total_time: Duration = puzzles[1..].iter().map(|p| p.run(parts)).sum();
-    println!("Total solve time: {}", DurationFormatter(total_time));
-}
+    println!(
+        "Sum of mean solve times: {}",
+        DurationFormatter(sum_of_means),
+    );
 
-fn run_one(puzzle: u32, puzzles: &[Puzzle], parts: [bool; 2]) -> Result<(), String> {
-    let puzzle = puzzles
-        .get(puzzle as usize)
-        .ok_or_else(|| format!("No puzzle {puzzle}"))?;
-
-    let total_time = puzzle.run(parts);
-    println!("Total solve time: {}", DurationFormatter(total_time));
+    println!("Total time: {}", DurationFormatter(total));
 
     Ok(())
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum AocError {
+    #[error("No puzzle {puzzle}")]
+    NoSuchPuzzle { puzzle: u32 },
+}
+
+fn run_all(puzzles: &[Puzzle], parts: [bool; 2]) -> Duration {
+    puzzles[1..].iter().map(|p| p.run(parts)).sum()
+}
+
+fn run_one(puzzle: u32, puzzles: &[Puzzle], parts: [bool; 2]) -> anyhow::Result<Duration> {
+    let puzzle = puzzles
+        .get(puzzle as usize)
+        .ok_or(AocError::NoSuchPuzzle { puzzle })?;
+
+    Ok(puzzle.run(parts))
 }
 
 #[derive(Parser)]
@@ -81,8 +93,8 @@ struct Args {
 
 struct Puzzle {
     puzzle: u32,
-    p1: Box<dyn Fn() -> (Duration, String)>,
-    p2: Box<dyn Fn() -> (Duration, String)>,
+    p1: Box<dyn Fn() -> (RuntimeStats, String)>,
+    p2: Box<dyn Fn() -> (RuntimeStats, String)>,
 }
 
 impl Puzzle {
@@ -102,16 +114,12 @@ impl Puzzle {
         d1 + d2
     }
 
-    fn run_part(&self, part: u32, func: &dyn Fn() -> (Duration, String)) -> Duration {
-        let (d, r) = func();
+    fn run_part(&self, part: u32, func: &dyn Fn() -> (RuntimeStats, String)) -> Duration {
+        let (stats, r) = func();
 
-        println!(
-            "Day {:02} part {part} ({}): {r}",
-            self.puzzle,
-            DurationFormatter(d)
-        );
+        println!("Day {:02} part {part} ({}): {r}", self.puzzle, stats);
 
-        d
+        stats.mean()
     }
 }
 
@@ -125,7 +133,7 @@ pub fn trace() {
 pub fn measure<R>(
     function: impl Fn() -> R + 'static,
     rounds: u32,
-) -> Box<dyn Fn() -> (Duration, String)>
+) -> Box<dyn Fn() -> (RuntimeStats, String)>
 where
     R: std::fmt::Display,
 {
@@ -134,7 +142,7 @@ where
             let start = Instant::now();
             let result = function();
             let duration = start.elapsed();
-            (duration, result.to_string())
+            (duration.into(), result.to_string())
         })
     } else {
         Box::new(move || {
@@ -153,10 +161,111 @@ where
                 }
             }
 
-            let duration = accumulator.iter().sum::<Duration>() / rounds;
-
-            (duration, result.unwrap().to_string())
+            (accumulator.into(), result.unwrap().to_string())
         })
+    }
+}
+
+pub enum RuntimeStats {
+    Single(Duration),
+    Multiple {
+        runs: Vec<Duration>,
+        min: Duration,
+        max: Duration,
+        mean: Duration,
+        standard_deviation: Duration,
+    },
+}
+
+impl RuntimeStats {
+    pub fn min(&self) -> Duration {
+        match self {
+            Self::Single(duration) => *duration,
+            Self::Multiple { min, .. } => *min,
+        }
+    }
+
+    pub fn max(&self) -> Duration {
+        match self {
+            Self::Single(duration) => *duration,
+            Self::Multiple { max, .. } => *max,
+        }
+    }
+
+    pub fn mean(&self) -> Duration {
+        match self {
+            Self::Single(duration) => *duration,
+            Self::Multiple { mean, .. } => *mean,
+        }
+    }
+
+    pub fn standard_deviation(&self) -> Duration {
+        match self {
+            Self::Single(duration) => *duration,
+            Self::Multiple {
+                standard_deviation, ..
+            } => *standard_deviation,
+        }
+    }
+}
+
+impl From<Duration> for RuntimeStats {
+    fn from(value: Duration) -> Self {
+        Self::Single(value)
+    }
+}
+
+impl From<Vec<Duration>> for RuntimeStats {
+    fn from(value: Vec<Duration>) -> Self {
+        let mut iter = value.iter();
+        let first = *iter.next().unwrap();
+        let (min, max, total) = iter.fold((first, first, first), |(min, max, total), next| {
+            (min.min(*next), max.max(*next), total + *next)
+        });
+
+        let mean = total / value.len() as u32;
+        let mean_secs = mean.as_secs_f64();
+
+        let variance = value
+            .iter()
+            .map(|duration| duration.as_secs_f64() - mean_secs)
+            .map(|difference| difference * difference)
+            .sum::<f64>()
+            / value.len() as f64;
+
+        let standard_deviation = Duration::from_secs_f64(variance.sqrt());
+
+        Self::Multiple {
+            runs: value,
+            min,
+            max,
+            mean,
+            standard_deviation,
+        }
+    }
+}
+
+impl std::fmt::Display for RuntimeStats {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Single(duration) => write!(f, "{}", DurationFormatter(*duration)),
+            Self::Multiple {
+                min,
+                max,
+                mean,
+                standard_deviation,
+                ..
+            } => {
+                write!(
+                    f,
+                    "mean: {}, sd: {}, min: {}, max: {}",
+                    DurationFormatter(*mean),
+                    DurationFormatter(*standard_deviation),
+                    DurationFormatter(*min),
+                    DurationFormatter(*max)
+                )
+            }
+        }
     }
 }
 
