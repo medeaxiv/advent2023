@@ -72,6 +72,7 @@ dependencies = [
  "aoc2023-01",
  "aoc2023-02",
  "aoc2023-03",
+ "aoc2023-04",
  "aoc2023-template",
  "clap",
  "tracing-subscriber",
@@ -112,6 +113,22 @@ dependencies = [
 
 [[package]]
 name = "aoc2023-03"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "itertools",
+ "nalgebra",
+ "nom",
+ "nom-supreme",
+ "nom_locate",
+ "rayon",
+ "rstest",
+ "thiserror",
+ "tracing",
+]
+
+[[package]]
+name = "aoc2023-04"
 version = "0.1.0"
 dependencies = [
  "anyhow",
