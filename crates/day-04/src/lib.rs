@@ -4,10 +4,9 @@ use itertools::Itertools;
 use nom::{
     bytes::complete::tag,
     character::complete::{self, space1},
-    combinator::map,
     multi::many1,
     sequence::{preceded, separated_pair, tuple},
-    IResult,
+    IResult, Parser,
 };
 use nom_supreme::final_parser::final_parser;
 
@@ -94,13 +93,11 @@ fn parse(input: &str) -> Result<Card, nom::error::Error<&str>> {
     }
 
     let id_parser = preceded(tag("Card"), number_parser);
-    let card_parser = map(
-        preceded(
-            tuple((id_parser, tag(":"))),
-            separated_pair(numbers_parser, tag(" |"), numbers_parser),
-        ),
-        |(winning, numbers)| Card { winning, numbers },
-    );
+    let card_parser = preceded(
+        tuple((id_parser, tag(":"))),
+        separated_pair(numbers_parser, tag(" |"), numbers_parser),
+    )
+    .map(|(winning, numbers)| Card { winning, numbers });
 
     final_parser(card_parser)(input)
 }
