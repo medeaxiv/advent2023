@@ -1,0 +1,19 @@
+[package]
+name = "aoc2023-05"
+authors.workspace = true
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+itertools.workspace = true
+nalgebra.workspace = true
+nom.workspace = true
+nom_locate.workspace = true
+nom-supreme.workspace = true
+rayon.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+
+[dev-dependencies]
+rstest.workspace = true
