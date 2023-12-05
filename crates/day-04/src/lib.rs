@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use itertools::Itertools;
 use nom::{
     bytes::complete::tag,
@@ -66,10 +64,10 @@ struct Card {
 
 impl Card {
     pub fn winning_number_count(&self) -> u32 {
-        let winning = BTreeSet::from_iter(self.winning.iter());
-        assert_eq!(winning.len(), self.winning.len());
-
-        self.numbers.iter().filter(|n| winning.contains(n)).count() as u32
+        self.numbers
+            .iter()
+            .filter(|n| self.winning.contains(n))
+            .count() as u32
     }
 
     pub fn score(&self) -> u32 {
