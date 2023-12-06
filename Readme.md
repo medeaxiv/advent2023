@@ -6,6 +6,8 @@ I probably won't finish it ¯\\\_(ツ)\_/¯
 
 ## Running
 
+Place your input files in the [`inputs`](./inputs/) directory, named `day-01.txt`, `day-02.txt`, etc.
+
 ```
 Usage: aoc2023.exe [OPTIONS] [PUZZLE]
 
