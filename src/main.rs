@@ -67,6 +67,11 @@ fn main() -> anyhow::Result<()> {
             measure(aoc2023_05::part1, rounds),
             measure(aoc2023_05::part2, rounds),
         ),
+        Puzzle::new(
+            6,
+            measure(aoc2023_06::part1, rounds),
+            measure(aoc2023_06::part2, rounds),
+        ),
     ];
 
     let start = Instant::now();
