@@ -1,28 +1,29 @@
 use std::time::{Duration, Instant};
 
+#[allow(clippy::type_complexity)]
 pub fn measure<R>(
-    function: impl Fn() -> R + 'static,
+    function: impl Fn(&str) -> R + 'static,
     rounds: u32,
-) -> Box<dyn Fn() -> (RuntimeStats, String)>
+) -> Box<dyn Fn(&str) -> (RuntimeStats, String)>
 where
     R: std::fmt::Display,
 {
     if rounds <= 1 {
-        Box::new(move || {
+        Box::new(move |input| {
             let start = Instant::now();
-            let result = function();
+            let result = function(input);
             let duration = start.elapsed();
             (duration.into(), result.to_string())
         })
     } else {
-        Box::new(move || {
+        Box::new(move |input| {
             let mut accumulator = Vec::with_capacity(rounds as usize);
 
             let mut result = None;
 
             for _ in 0..rounds {
                 let start = Instant::now();
-                let round_result = function();
+                let round_result = function(input);
                 let duration = start.elapsed();
                 accumulator.push(duration);
 

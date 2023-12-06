@@ -39,36 +39,43 @@ fn main() -> anyhow::Result<()> {
     let puzzles = [
         Puzzle::new(
             0,
+            "inputs/template.txt",
             measure(aoc2023_template::part1, rounds),
             measure(aoc2023_template::part2, rounds),
         ),
         Puzzle::new(
             1,
+            "inputs/day-01.txt",
             measure(aoc2023_01::part1, rounds),
             measure(aoc2023_01::part2, rounds),
         ),
         Puzzle::new(
             2,
+            "inputs/day-02.txt",
             measure(aoc2023_02::part1, rounds),
             measure(aoc2023_02::part2, rounds),
         ),
         Puzzle::new(
             3,
+            "inputs/day-03.txt",
             measure(aoc2023_03::part1, rounds),
             measure(aoc2023_03::part2, rounds),
         ),
         Puzzle::new(
             4,
+            "inputs/day-04.txt",
             measure(aoc2023_04::part1, rounds),
             measure(aoc2023_04::part2, rounds),
         ),
         Puzzle::new(
             5,
+            "inputs/day-05.txt",
             measure(aoc2023_05::part1, rounds),
             measure(aoc2023_05::part2, rounds),
         ),
         Puzzle::new(
             6,
+            "inputs/day-06.txt",
             measure(aoc2023_06::part1, rounds),
             measure(aoc2023_06::part2, rounds),
         ),
@@ -78,7 +85,7 @@ fn main() -> anyhow::Result<()> {
     let sum_of_means = if let Some(puzzle) = args.puzzle {
         run_one(puzzle, &puzzles, parts)?
     } else {
-        run_all(&puzzles, parts)
+        run_all(&puzzles, parts)?
     };
     let total = start.elapsed();
 
@@ -96,9 +103,11 @@ fn main() -> anyhow::Result<()> {
 pub enum AocError {
     #[error("No puzzle {puzzle}")]
     NoSuchPuzzle { puzzle: u32 },
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
 }
 
-fn run_all(puzzles: &[Puzzle], parts: [bool; 2]) -> Duration {
+fn run_all(puzzles: &[Puzzle], parts: [bool; 2]) -> Result<Duration, AocError> {
     puzzles[1..].iter().map(|p| p.run(parts)).sum()
 }
 
@@ -107,7 +116,7 @@ fn run_one(puzzle: u32, puzzles: &[Puzzle], parts: [bool; 2]) -> Result<Duration
         .get(puzzle as usize)
         .ok_or(AocError::NoSuchPuzzle { puzzle })?;
 
-    Ok(puzzle.run(parts))
+    puzzle.run(parts)
 }
 
 pub fn trace() {

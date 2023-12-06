@@ -1,15 +1,13 @@
-const INPUT: &str = include_str!("input.txt");
-
-pub fn part1() -> impl std::fmt::Display {
-    solve_part1(INPUT)
+pub fn part1(input: &str) -> impl std::fmt::Display {
+    solve_part1(input)
 }
 
 fn solve_part1(_input: &str) -> &'static str {
     "TODO"
 }
 
-pub fn part2() -> impl std::fmt::Display {
-    solve_part2(INPUT)
+pub fn part2(input: &str) -> impl std::fmt::Display {
+    solve_part2(input)
 }
 
 fn solve_part2(_input: &str) -> &'static str {
