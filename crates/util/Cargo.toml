@@ -1,5 +1,5 @@
 [package]
-name = "aoc2023-03"
+name = "aoc-util"
 authors.workspace = true
 version.workspace = true
 edition.workspace = true
@@ -15,7 +15,6 @@ rayon.workspace = true
 tracing.workspace = true
 thiserror.workspace = true
 anyhow.workspace = true
-aoc-util = { path = "../util" }
 
 [dev-dependencies]
 rstest.workspace = true
