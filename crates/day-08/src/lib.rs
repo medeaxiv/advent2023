@@ -60,33 +60,15 @@ fn solve_part2(input: &str) -> u64 {
             for (idx, direction) in path.iter().cycle().enumerate() {
                 pos = network.adjacency.get(pos).unwrap().get(*direction);
                 if network.index[pos].ends_with('Z') {
-                    steps = idx;
+                    steps = idx + 1;
                     break;
                 }
             }
 
-            (steps + 1) as u64
+            steps as u64
         })
-        .reduce(lcm)
+        .reduce(aoc_util::least_common_multiple)
         .unwrap()
-}
-
-fn lcm(a: u64, b: u64) -> u64 {
-    if a == 0 && b == 0 {
-        return 0;
-    }
-
-    (a * b) / gcd(a, b)
-}
-
-fn gcd(mut a: u64, mut b: u64) -> u64 {
-    while b != 0 {
-        let t = b;
-        b = a % b;
-        a = t;
-    }
-
-    a
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
