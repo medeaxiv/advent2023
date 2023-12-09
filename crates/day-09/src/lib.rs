@@ -5,7 +5,11 @@ pub fn part1(input: &str) -> impl std::fmt::Display {
 }
 
 fn solve_part1(input: &str) -> i64 {
-    input.lines().map(parse).map(extrapolate).sum()
+    input
+        .lines()
+        .map(parse)
+        .map(|history| extrapolate(history.into_iter()))
+        .sum()
 }
 
 pub fn part2(input: &str) -> impl std::fmt::Display {
@@ -16,15 +20,12 @@ fn solve_part2(input: &str) -> i64 {
     input
         .lines()
         .map(parse)
-        .map(|mut history| {
-            history.reverse();
-            extrapolate(history)
-        })
+        .map(|history| extrapolate(history.into_iter().rev()))
         .sum()
 }
 
-fn extrapolate(history: Vec<i64>) -> i64 {
-    delta_sequences(history)
+fn extrapolate(history: impl Iterator<Item = i64>) -> i64 {
+    delta_sequences(history.collect_vec())
         .map(|deltas| *deltas.last().unwrap())
         .sum()
 }
