@@ -67,7 +67,7 @@ fn solve_part2(input: &str) -> u64 {
 
             steps as u64
         })
-        .reduce(aoc_util::least_common_multiple)
+        .reduce(aoc_util::numerics::least_common_multiple)
         .unwrap()
 }
 
