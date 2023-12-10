@@ -70,6 +70,7 @@ name = "aoc-util"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bitflags",
  "itertools",
  "nalgebra",
  "nom",
@@ -109,6 +110,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "aoc-util",
+ "bitflags",
  "itertools",
  "nalgebra",
  "nom",
@@ -128,6 +130,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "aoc-util",
+ "bitflags",
  "itertools",
  "nalgebra",
  "nom",
@@ -146,6 +149,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "aoc-util",
+ "bitflags",
  "itertools",
  "nalgebra",
  "nom",
@@ -164,6 +168,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "aoc-util",
+ "bitflags",
  "itertools",
  "nalgebra",
  "nom",
@@ -182,6 +187,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "aoc-util",
+ "bitflags",
  "itertools",
  "nalgebra",
  "nom",
@@ -200,6 +206,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "aoc-util",
+ "bitflags",
  "itertools",
  "nalgebra",
  "nom",
@@ -218,6 +225,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "aoc-util",
+ "bitflags",
  "itertools",
  "nalgebra",
  "nom",
@@ -236,6 +244,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "aoc-util",
+ "bitflags",
  "itertools",
  "nalgebra",
  "nom",
@@ -254,6 +263,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "aoc-util",
+ "bitflags",
  "itertools",
  "nalgebra",
  "nom",
@@ -291,6 +301,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "aoc-util",
+ "bitflags",
  "itertools",
  "nalgebra",
  "nom",

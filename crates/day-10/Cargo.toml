@@ -5,6 +5,7 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
+bitflags.workspace = true
 itertools.workspace = true
 nalgebra.workspace = true
 nom.workspace = true
@@ -16,7 +17,6 @@ tracing.workspace = true
 thiserror.workspace = true
 anyhow.workspace = true
 aoc-util = { path = "../util" }
-bitflags = "2.4"
 
 [dev-dependencies]
 rstest.workspace = true
