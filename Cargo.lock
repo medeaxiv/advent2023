@@ -96,6 +96,7 @@ dependencies = [
  "aoc2023-07",
  "aoc2023-08",
  "aoc2023-09",
+ "aoc2023-10",
  "aoc2023-template",
  "clap",
  "thiserror",
@@ -266,6 +267,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "aoc2023-10"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "aoc-util",
+ "bitflags",
+ "itertools",
+ "nalgebra",
+ "nom",
+ "nom-supreme",
+ "nom_locate",
+ "num",
+ "rayon",
+ "rstest",
+ "thiserror",
+ "tracing",
+]
+
+[[package]]
 name = "aoc2023-template"
 version = "0.1.0"
 dependencies = [
@@ -303,6 +323,12 @@ name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
+
+[[package]]
+name = "bitflags"
+version = "2.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "327762f6e5a765692301e5bb513e0d9fef63be86bbc14528052b1cd3e6f03e07"
 
 [[package]]
 name = "brownstone"
