@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use aoc_util::cache::{Cache, NoCache};
 use itertools::Itertools;
+use rayon::prelude::*;
 
 pub fn part1(input: &str) -> impl std::fmt::Display {
     solve_part1(input)
@@ -9,7 +10,7 @@ pub fn part1(input: &str) -> impl std::fmt::Display {
 
 fn solve_part1(input: &str) -> usize {
     input
-        .lines()
+        .par_lines()
         .map(parse)
         .map(|(springs, pattern)| {
             let mut cache = NoCache;
@@ -26,7 +27,7 @@ const PART2_EXPANSION: usize = 5;
 
 fn solve_part2(input: &str) -> usize {
     input
-        .lines()
+        .par_lines()
         .map(parse)
         .map(|item| expand(item, PART2_EXPANSION))
         .map(|(springs, pattern)| {
@@ -41,26 +42,6 @@ enum SpringState {
     Operational,
     Damaged,
     Unknown,
-}
-
-struct FormattedSprings<'a>(&'a [SpringState]);
-
-impl<'a> std::fmt::Debug for FormattedSprings<'a> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut result = Ok(());
-
-        for state in self.0.iter() {
-            let c = match state {
-                SpringState::Operational => '.',
-                SpringState::Damaged => '#',
-                SpringState::Unknown => '?',
-            };
-
-            result = result.and_then(|_| write!(f, "{c}"));
-        }
-
-        result
-    }
 }
 
 fn parse(line: &str) -> (Vec<SpringState>, Vec<usize>) {
