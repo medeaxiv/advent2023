@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use aoc_util::cache::{Cache, NoCache};
 use itertools::Itertools;
 
 pub fn part1(input: &str) -> impl std::fmt::Display {
@@ -10,7 +11,10 @@ fn solve_part1(input: &str) -> usize {
     input
         .lines()
         .map(parse)
-        .map(|(springs, pattern)| count_fits(&springs, &pattern))
+        .map(|(springs, pattern)| {
+            let mut cache = NoCache;
+            count_fits(&springs, &pattern, &mut cache)
+        })
         .sum()
 }
 
@@ -25,7 +29,10 @@ fn solve_part2(input: &str) -> usize {
         .lines()
         .map(parse)
         .map(|item| expand(item, PART2_EXPANSION))
-        .map(|(springs, pattern)| count_fits(&springs, &pattern))
+        .map(|(springs, pattern)| {
+            let mut cache = HashMap::new();
+            count_fits(&springs, &pattern, &mut cache)
+        })
         .sum()
 }
 
@@ -109,13 +116,19 @@ fn can_fit_length(springs: &[SpringState], from: usize, length: usize) -> bool {
     true
 }
 
-fn count_fits(springs: &[SpringState], pattern: &[usize]) -> usize {
-    fn count(
+fn count_fits<C>(springs: &[SpringState], pattern: &[usize], cache: &mut C) -> usize
+where
+    C: Cache<(usize, usize), usize>,
+{
+    fn count_internal<C>(
         pos: (usize, usize),
         springs: &[SpringState],
         pattern: &[usize],
-        cache: &mut HashMap<(usize, usize), usize>,
-    ) -> usize {
+        cache: &mut C,
+    ) -> usize
+    where
+        C: Cache<(usize, usize), usize>,
+    {
         if let Some(&cached) = cache.get(&pos) {
             return cached;
         }
@@ -137,20 +150,18 @@ fn count_fits(springs: &[SpringState], pattern: &[usize]) -> usize {
 
         if can_fit_length(springs, 0, len) {
             let next_pos = (pos.0 + len + 1, pos.1 + 1);
-            total += count(next_pos, slice_from(springs, len + 1), &pattern[1..], cache)
+            total += count_internal(next_pos, slice_from(springs, len + 1), &pattern[1..], cache)
         }
 
         if springs[0] != SpringState::Damaged {
-            total += count((pos.0 + 1, pos.1), slice_from(springs, 1), pattern, cache);
+            total += count_internal((pos.0 + 1, pos.1), slice_from(springs, 1), pattern, cache);
         }
 
         cache.insert(pos, total);
         total
     }
 
-    let mut cache = HashMap::new();
-    let count = count((0, 0), springs, pattern, &mut cache);
-    count
+    count_internal((0, 0), springs, pattern, cache)
 }
 
 fn slice_from<T>(slice: &[T], idx: usize) -> &[T] {
@@ -211,7 +222,8 @@ mod tests {
     #[case("?###???????? 3,2,1", 10)]
     fn test_part1_single(#[case] line: &str, #[case] expected: usize) {
         let (springs, pattern) = parse(line);
-        let solution = count_fits(&springs, &pattern);
+        let mut cache = NoCache;
+        let solution = count_fits(&springs, &pattern, &mut cache);
         assert_eq!(solution, expected);
     }
 
@@ -230,7 +242,8 @@ mod tests {
     #[case("?###???????? 3,2,1", 506250)]
     fn test_part2_single(#[case] line: &str, #[case] expected: usize) {
         let (springs, pattern) = expand(parse(line), PART2_EXPANSION);
-        let solution = count_fits(&springs, &pattern);
+        let mut cache = HashMap::new();
+        let solution = count_fits(&springs, &pattern, &mut cache);
         assert_eq!(solution, expected);
     }
 }
