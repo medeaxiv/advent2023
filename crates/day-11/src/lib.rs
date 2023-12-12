@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use aoc_util::geometry::manhattan_distance;
 use itertools::Itertools;
 use nalgebra::Vector2;
 
@@ -13,7 +14,7 @@ fn solve_part1(input: &str) -> u64 {
     map.galaxies
         .iter()
         .tuple_combinations()
-        .map(|(a, b)| (b - a).abs().iter().sum::<i64>() as u64)
+        .map(|(a, b)| manhattan_distance(*a, *b) as u64)
         .sum()
 }
 
@@ -27,7 +28,7 @@ fn solve_part2(input: &str, expansion: i64) -> u64 {
     map.galaxies
         .iter()
         .tuple_combinations()
-        .map(|(a, b)| (b - a).abs().iter().sum::<i64>() as u64)
+        .map(|(a, b)| manhattan_distance(*a, *b) as u64)
         .sum()
 }
 
