@@ -1,3 +1,6 @@
+use std::num::NonZeroU32;
+
+use aoc_util::cache::Cache;
 use itertools::Itertools;
 use nom::{
     bytes::complete::tag,
@@ -33,25 +36,28 @@ fn solve_part2(input: &str) -> u32 {
         .map(|(idx, count)| ((idx + 1)..=(idx + count as usize)).collect_vec())
         .collect_vec();
 
-    fn count(idx: usize, dependencies: &Vec<Vec<usize>>, cache: &mut Vec<u32>) -> u32 {
-        if cache[idx] > 0 {
-            return cache[idx];
+    fn count_internal<C>(idx: usize, dependencies: &Vec<Vec<usize>>, cache: &mut C) -> u32
+    where
+        C: Cache<usize, NonZeroU32>,
+    {
+        if let Some(&value) = cache.get(&idx) {
+            return value.get();
         }
 
         let count = dependencies
             .get(idx)
             .expect("out of bounds")
             .iter()
-            .map(|idx| count(*idx, dependencies, cache))
+            .map(|idx| count_internal(*idx, dependencies, cache))
             .fold(1, |count, el| count + el);
-        cache[idx] = count;
+        cache.insert(idx, NonZeroU32::new(count).unwrap());
 
         count
     }
 
-    let mut cache = vec![0; dependencies.len()];
+    let mut cache = vec![None; dependencies.len()];
     (0..dependencies.len())
-        .map(|idx| count(idx, &dependencies, &mut cache))
+        .map(|idx| count_internal(idx, &dependencies, &mut cache))
         .sum()
 }
 
