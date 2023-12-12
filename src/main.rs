@@ -109,6 +109,12 @@ fn main() -> anyhow::Result<()> {
             measure(aoc2023_11::part1, rounds),
             measure(aoc2023_11::part2, rounds),
         ),
+        Puzzle::new(
+            12,
+            "inputs/day-12.txt",
+            measure(aoc2023_12::part1, rounds),
+            measure(aoc2023_12::part2, rounds),
+        ),
     ];
 
     let start = Instant::now();
