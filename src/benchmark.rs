@@ -43,6 +43,7 @@ pub enum RuntimeStats {
         runs: Vec<Duration>,
         min: Duration,
         max: Duration,
+        median: Duration,
         mean: Duration,
         standard_deviation: Duration,
     },
@@ -64,7 +65,18 @@ impl From<Duration> for RuntimeStats {
 }
 
 impl From<Vec<Duration>> for RuntimeStats {
-    fn from(value: Vec<Duration>) -> Self {
+    fn from(mut value: Vec<Duration>) -> Self {
+        assert!(!value.is_empty());
+
+        value.sort();
+
+        let median = if value.len() % 2 == 0 {
+            let middle = value.len() / 2;
+            (value[middle - 1] + value[middle]) / 2
+        } else {
+            value[value.len() / 2]
+        };
+
         let mut iter = value.iter();
         let first = *iter.next().unwrap();
         let (min, max, total) = iter.fold((first, first, first), |(min, max, total), next| {
@@ -87,6 +99,7 @@ impl From<Vec<Duration>> for RuntimeStats {
             runs: value,
             min,
             max,
+            median,
             mean,
             standard_deviation,
         }
