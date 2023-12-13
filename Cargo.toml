@@ -49,5 +49,6 @@ aoc2023-09 = { path = "crates/day-09" }
 aoc2023-10 = { path = "crates/day-10" }
 aoc2023-11 = { path = "crates/day-11" }
 aoc2023-12 = { path = "crates/day-12" }
+aoc2023-13 = { path = "crates/day-13" }
 clap = { version = "4.4", features = ["derive"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
