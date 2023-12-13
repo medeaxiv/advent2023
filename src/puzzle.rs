@@ -1,7 +1,4 @@
-use std::{
-    path::{Path, PathBuf},
-    time::Duration,
-};
+use std::path::{Path, PathBuf};
 
 use crate::{benchmark::RuntimeStats, AocError};
 
@@ -29,34 +26,23 @@ impl Puzzle {
         }
     }
 
-    pub fn run(&self, parts: [bool; 2]) -> Result<Duration, AocError> {
+    pub fn run(
+        &self,
+        parts: [bool; 2],
+        mut visitor: impl FnMut(u32, u32, RuntimeStats, String),
+    ) -> Result<(), AocError> {
         let input = std::fs::read_to_string(&self.input_file)?;
 
-        let d1 = if parts[0] {
-            self.run_part(1, input.as_str(), &self.p1)
-        } else {
-            Duration::ZERO
-        };
+        if parts[0] {
+            let (stats, result) = (*self.p1)(input.as_str());
+            visitor(self.puzzle, 1, stats, result);
+        }
 
-        let d2 = if parts[1] {
-            self.run_part(2, input.as_str(), &self.p2)
-        } else {
-            Duration::ZERO
-        };
+        if parts[1] {
+            let (stats, result) = (*self.p2)(input.as_str());
+            visitor(self.puzzle, 2, stats, result);
+        }
 
-        Ok(d1 + d2)
-    }
-
-    fn run_part(
-        &self,
-        part: u32,
-        input: &str,
-        func: &dyn Fn(&str) -> (RuntimeStats, String),
-    ) -> Duration {
-        let (stats, r) = func(input);
-
-        println!("Day {:02} part {part} ({}): {r}", self.puzzle, stats);
-
-        stats.median()
+        Ok(())
     }
 }

@@ -1,5 +1,6 @@
 use std::time::{Duration, Instant};
 
+use benchmark::RuntimeStats;
 use clap::Parser;
 use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 
@@ -118,16 +119,24 @@ fn main() -> anyhow::Result<()> {
     ];
 
     let start = Instant::now();
-    let sum_of_means = if let Some(puzzle) = args.puzzle {
-        run_one(puzzle, &puzzles, parts)?
-    } else {
-        run_all(&puzzles, parts)?
+
+    let mut sum_of_medians = Duration::ZERO;
+    let visitor = |puzzle, part, stats: RuntimeStats, result| {
+        println!("Day {puzzle:02} part {part} ({stats}): {result}");
+        sum_of_medians += stats.median();
     };
+
+    if let Some(puzzle) = args.puzzle {
+        run_one(puzzle, &puzzles, parts, visitor)?;
+    } else {
+        run_all(&puzzles, parts, visitor)?;
+    }
+
     let total = start.elapsed();
 
     println!(
         "Sum of median solve times: {}",
-        DurationFormatter(sum_of_means),
+        DurationFormatter(sum_of_medians),
     );
 
     println!("Total time: {}", DurationFormatter(total));
@@ -143,16 +152,29 @@ pub enum AocError {
     Io(#[from] std::io::Error),
 }
 
-fn run_all(puzzles: &[Puzzle], parts: [bool; 2]) -> Result<Duration, AocError> {
-    puzzles[1..].iter().map(|p| p.run(parts)).sum()
+fn run_all(
+    puzzles: &[Puzzle],
+    parts: [bool; 2],
+    mut visitor: impl FnMut(u32, u32, RuntimeStats, String),
+) -> Result<(), AocError> {
+    for puzzle in puzzles[1..].iter() {
+        puzzle.run(parts, &mut visitor)?;
+    }
+
+    Ok(())
 }
 
-fn run_one(puzzle: u32, puzzles: &[Puzzle], parts: [bool; 2]) -> Result<Duration, AocError> {
+fn run_one(
+    puzzle: u32,
+    puzzles: &[Puzzle],
+    parts: [bool; 2],
+    visitor: impl FnMut(u32, u32, RuntimeStats, String),
+) -> Result<(), AocError> {
     let puzzle = puzzles
         .get(puzzle as usize)
         .ok_or(AocError::NoSuchPuzzle { puzzle })?;
 
-    puzzle.run(parts)
+    puzzle.run(parts, visitor)
 }
 
 pub fn trace() {
