@@ -41,11 +41,9 @@ pub enum RuntimeStats {
     Single(Duration),
     Multiple {
         runs: Vec<Duration>,
+        median: Duration,
         min: Duration,
         max: Duration,
-        median: Duration,
-        mean: Duration,
-        standard_deviation: Duration,
     },
 }
 
@@ -70,38 +68,15 @@ impl From<Vec<Duration>> for RuntimeStats {
 
         value.sort();
 
-        let median = if value.len() % 2 == 0 {
-            let middle = value.len() / 2;
-            (value[middle - 1] + value[middle]) / 2
-        } else {
-            value[value.len() / 2]
-        };
-
-        let mut iter = value.iter();
-        let first = *iter.next().unwrap();
-        let (min, max, total) = iter.fold((first, first, first), |(min, max, total), next| {
-            (min.min(*next), max.max(*next), total + *next)
-        });
-
-        let mean = total / value.len() as u32;
-        let mean_secs = mean.as_secs_f64();
-
-        let variance = value
-            .iter()
-            .map(|duration| duration.as_secs_f64() - mean_secs)
-            .map(|difference| difference * difference)
-            .sum::<f64>()
-            / value.len() as f64;
-
-        let standard_deviation = Duration::from_secs_f64(variance.sqrt());
+        let median = median(value.as_slice());
+        let min = value[0];
+        let max = value[value.len() - 1];
 
         Self::Multiple {
             runs: value,
+            median,
             min,
             max,
-            median,
-            mean,
-            standard_deviation,
         }
     }
 }
@@ -122,6 +97,17 @@ impl std::fmt::Display for RuntimeStats {
                 )
             }
         }
+    }
+}
+
+fn median(slice: &[Duration]) -> Duration {
+    assert!(!slice.is_empty());
+
+    let middle = slice.len() / 2;
+    if slice.len() % 2 == 0 {
+        (slice[middle - 1] + slice[middle]) / 2
+    } else {
+        slice[middle]
     }
 }
 
