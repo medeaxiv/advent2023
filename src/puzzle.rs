@@ -57,6 +57,6 @@ impl Puzzle {
 
         println!("Day {:02} part {part} ({}): {r}", self.puzzle, stats);
 
-        stats.mean()
+        stats.median()
     }
 }

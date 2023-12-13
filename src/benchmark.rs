@@ -50,10 +50,10 @@ pub enum RuntimeStats {
 }
 
 impl RuntimeStats {
-    pub fn mean(&self) -> Duration {
+    pub fn median(&self) -> Duration {
         match self {
             Self::Single(duration) => *duration,
-            Self::Multiple { mean, .. } => *mean,
+            Self::Multiple { median, .. } => *median,
         }
     }
 }

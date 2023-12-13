@@ -126,7 +126,7 @@ fn main() -> anyhow::Result<()> {
     let total = start.elapsed();
 
     println!(
-        "Sum of mean solve times: {}",
+        "Sum of median solve times: {}",
         DurationFormatter(sum_of_means),
     );
 
