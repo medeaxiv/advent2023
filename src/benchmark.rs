@@ -111,17 +111,12 @@ impl std::fmt::Display for RuntimeStats {
         match self {
             Self::Single(duration) => write!(f, "{}", DurationFormatter(*duration)),
             Self::Multiple {
-                min,
-                max,
-                mean,
-                standard_deviation,
-                ..
+                min, max, median, ..
             } => {
                 write!(
                     f,
-                    "mean: {}, sd: {}, min: {}, max: {}",
-                    DurationFormatter(*mean),
-                    DurationFormatter(*standard_deviation),
+                    "median: {}, min: {}, max: {}",
+                    DurationFormatter(*median),
                     DurationFormatter(*min),
                     DurationFormatter(*max)
                 )
