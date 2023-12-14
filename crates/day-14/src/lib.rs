@@ -1,5 +1,7 @@
 use std::{cell::RefCell, ops::Range, rc::Rc};
 
+use itertools::Itertools;
+
 pub fn part1(input: &str) -> impl std::fmt::Display {
     solve_part1(input)
 }
@@ -17,21 +19,26 @@ pub fn part2(input: &str) -> impl std::fmt::Display {
 fn solve_part2(input: &str) -> usize {
     let mut platform = parse(input);
 
-    let store = Rc::new(RefCell::new(vec![(
-        platform.field.clone(),
-        platform.load(),
-    )]));
+    let store = vec![platform.boulders().map(|i| i as u16).collect_vec()];
+    let store = Rc::new(RefCell::new(store));
+    let loads = vec![platform.load()];
+    let loads = Rc::new(RefCell::new(loads));
+
     let next_store = store.clone();
+    let next_loads = loads.clone();
+
     let ne_store = store.clone();
 
     let (cycle_length, cycle_offset) = aoc_util::sequence::detect_cycle(
         move |&current| {
             let mut store = next_store.borrow_mut();
+            let mut loads = next_loads.borrow_mut();
 
             let next = current + 1;
             while store.len() <= next {
                 platform.cycle();
-                store.push((platform.field.clone(), platform.load()));
+                store.push(platform.boulders().map(|i| i as u16).collect_vec());
+                loads.push(platform.load());
             }
 
             next
@@ -44,8 +51,8 @@ fn solve_part2(input: &str) -> usize {
     );
 
     let idx = cycle_offset + (1_000_000_000 - cycle_offset) % cycle_length;
-    let store_borrow = store.borrow();
-    store_borrow[idx].1
+    let lb = loads.borrow();
+    lb[idx]
 }
 
 struct Platform {
@@ -101,12 +108,12 @@ impl Platform {
             for row in row_range.clone() {
                 let idx = index(column, row);
                 match self.field[idx] {
-                    Tile::Cube => {
+                    Tile::Block => {
                         drop_row = row + 1;
                     }
-                    Tile::Round => {
+                    Tile::Boulder => {
                         if row != drop_row {
-                            self.field[index(column, drop_row)] = Tile::Round;
+                            self.field[index(column, drop_row)] = Tile::Boulder;
                             self.field[idx] = Tile::Empty;
                         }
 
@@ -118,11 +125,21 @@ impl Platform {
         }
     }
 
+    pub fn boulders(&self) -> impl Iterator<Item = usize> + '_ {
+        self.field
+            .iter()
+            .enumerate()
+            .filter_map(|(idx, tile)| match tile {
+                Tile::Boulder => Some(idx),
+                _ => None,
+            })
+    }
+
     pub fn load(&self) -> usize {
         self.field
             .iter()
             .enumerate()
-            .filter(|(_, tile)| matches!(tile, Tile::Round))
+            .filter(|(_, tile)| matches!(tile, Tile::Boulder))
             .map(|(idx, _)| self.height - idx / self.width)
             .sum()
     }
@@ -167,16 +184,16 @@ enum Direction {
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Tile {
     Empty,
-    Cube,
-    Round,
+    Block,
+    Boulder,
 }
 
 impl std::fmt::Debug for Tile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Empty => write!(f, "."),
-            Self::Cube => write!(f, "#"),
-            Self::Round => write!(f, "O"),
+            Self::Block => write!(f, "#"),
+            Self::Boulder => write!(f, "O"),
         }
     }
 }
@@ -194,8 +211,8 @@ fn parse(input: &str) -> Platform {
 
         for c in line.chars() {
             let tile = match c {
-                '#' => Tile::Cube,
-                'O' => Tile::Round,
+                '#' => Tile::Block,
+                'O' => Tile::Boulder,
                 _ => Tile::Empty,
             };
 
