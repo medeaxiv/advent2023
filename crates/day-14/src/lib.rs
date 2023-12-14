@@ -1,4 +1,4 @@
-use std::{cell::RefCell, ops::Range, rc::Rc};
+use std::{collections::BTreeMap, ops::Range};
 
 use itertools::Itertools;
 
@@ -19,40 +19,19 @@ pub fn part2(input: &str) -> impl std::fmt::Display {
 fn solve_part2(input: &str) -> usize {
     let mut platform = parse(input);
 
-    let store = vec![platform.boulders().map(|i| i as u16).collect_vec()];
-    let store = Rc::new(RefCell::new(store));
-    let loads = vec![platform.load()];
-    let loads = Rc::new(RefCell::new(loads));
-
-    let next_store = store.clone();
-    let next_loads = loads.clone();
-
-    let ne_store = store.clone();
-
-    let (cycle_length, cycle_offset) = aoc_util::sequence::detect_cycle(
-        move |&current| {
-            let mut store = next_store.borrow_mut();
-            let mut loads = next_loads.borrow_mut();
-
-            let next = current + 1;
-            while store.len() <= next {
-                platform.cycle();
-                store.push(platform.boulders().map(|i| i as u16).collect_vec());
-                loads.push(platform.load());
-            }
-
+    let mut loads = Vec::new();
+    let (cycle_length, cycle_offset) = aoc_util::sequence::detect_cycle_cached(
+        || {
+            let next = platform.boulders().map(|idx| idx as u16).collect_vec();
+            loads.push(platform.load());
+            platform.cycle();
             next
         },
-        move |&tortoise, &hare| {
-            let store = ne_store.borrow();
-            store[tortoise] != store[hare]
-        },
-        0usize,
+        &mut BTreeMap::new(),
     );
 
     let idx = cycle_offset + (1_000_000_000 - cycle_offset) % cycle_length;
-    let lb = loads.borrow();
-    lb[idx]
+    loads[idx]
 }
 
 struct Platform {
