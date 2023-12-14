@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, ops::Range, rc::Rc};
 
 pub fn part1(input: &str) -> impl std::fmt::Display {
     solve_part1(input)
@@ -63,34 +63,39 @@ impl Platform {
     }
 
     pub fn tilt(&mut self, direction: Direction) {
-        let index_north = |column: usize, row: usize| row * self.width + column;
-        let index_south = |column: usize, row: usize| (self.height - row - 1) * self.width + column;
-        let index_west = |column: usize, row: usize| column * self.width + row;
-        let index_east = |column: usize, row: usize| column * self.width + (self.width - row - 1);
+        let width = self.width;
+        let height = self.height;
 
-        let (index, column_range, row_range) = match direction {
-            Direction::North => (
-                &index_north as &dyn Fn(usize, usize) -> usize,
-                0..self.width,
-                0..self.height,
+        match direction {
+            Direction::North => self.apply_tilt(
+                |column: usize, row: usize| row * width + column,
+                0..width,
+                0..height,
             ),
-            Direction::South => (
-                &index_south as &dyn Fn(usize, usize) -> usize,
-                0..self.width,
-                0..self.height,
+            Direction::South => self.apply_tilt(
+                |column: usize, row: usize| (height - row - 1) * width + column,
+                0..width,
+                0..height,
             ),
-            Direction::West => (
-                &index_west as &dyn Fn(usize, usize) -> usize,
-                0..self.height,
-                0..self.width,
+            Direction::West => self.apply_tilt(
+                |column: usize, row: usize| column * width + row,
+                0..height,
+                0..width,
             ),
-            Direction::East => (
-                &index_east as &dyn Fn(usize, usize) -> usize,
-                0..self.height,
-                0..self.width,
+            Direction::East => self.apply_tilt(
+                |column: usize, row: usize| column * width + (width - row - 1),
+                0..height,
+                0..width,
             ),
         };
+    }
 
+    fn apply_tilt(
+        &mut self,
+        index: impl Fn(usize, usize) -> usize,
+        column_range: Range<usize>,
+        row_range: Range<usize>,
+    ) {
         for column in column_range {
             let mut drop_row = 0;
             for row in row_range.clone() {
