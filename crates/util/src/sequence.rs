@@ -1,12 +1,8 @@
 use crate::cache::Cache;
 
-pub fn detect_cycle<T>(
-    mut next: impl FnMut(&T) -> T,
-    ne: impl Fn(&T, &T) -> bool,
-    start: T,
-) -> (usize, usize)
+pub fn detect_cycle<T>(mut next: impl FnMut(&T) -> T, start: T) -> (usize, usize)
 where
-    T: Clone,
+    T: Clone + PartialEq,
 {
     // Brent's cycle detection algorithm.
     // Adapted from https://en.wikipedia.org/wiki/Cycle_detection#Brent's_algorithm
@@ -16,7 +12,7 @@ where
     let mut cycle_length = 1;
     let mut tortoise = start.clone();
     let mut hare = next(&start); // next(&start) is the element/node next to start.
-    while ne(&tortoise, &hare) {
+    while tortoise != hare {
         if power == cycle_length {
             // time to start a new power of two?
             tortoise = hare.clone();
@@ -39,7 +35,7 @@ where
 
     // Next, the hare and tortoise move at same speed until they agree
     let mut cycle_offset = 0;
-    while ne(&tortoise, &hare) {
+    while tortoise != hare {
         tortoise = next(&tortoise);
         hare = next(&hare);
         cycle_offset += 1;
