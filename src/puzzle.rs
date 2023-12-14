@@ -29,18 +29,18 @@ impl Puzzle {
     pub fn run(
         &self,
         parts: [bool; 2],
-        mut visitor: impl FnMut(u32, u32, RuntimeStats, String),
+        mut visitor: impl FnMut(u32, u32, RuntimeStats, String) -> Result<(), AocError>,
     ) -> Result<(), AocError> {
         let input = std::fs::read_to_string(&self.input_file)?;
 
         if parts[0] {
             let (stats, result) = (*self.p1)(input.as_str());
-            visitor(self.puzzle, 1, stats, result);
+            visitor(self.puzzle, 1, stats, result)?;
         }
 
         if parts[1] {
             let (stats, result) = (*self.p2)(input.as_str());
-            visitor(self.puzzle, 2, stats, result);
+            visitor(self.puzzle, 2, stats, result)?;
         }
 
         Ok(())

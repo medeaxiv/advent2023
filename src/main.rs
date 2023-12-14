@@ -138,6 +138,8 @@ fn main() -> anyhow::Result<()> {
     let visitor = |puzzle, part, stats: RuntimeStats, result| {
         println!("Day {puzzle:02} part {part} ({stats}): {result}");
         sum_of_medians += stats.median();
+
+        Ok(())
     };
 
     if let Some(puzzle) = args.puzzle {
@@ -169,7 +171,7 @@ pub enum AocError {
 fn run_all(
     puzzles: &[Puzzle],
     parts: [bool; 2],
-    mut visitor: impl FnMut(u32, u32, RuntimeStats, String),
+    mut visitor: impl FnMut(u32, u32, RuntimeStats, String) -> Result<(), AocError>,
 ) -> Result<(), AocError> {
     for puzzle in puzzles[1..].iter() {
         puzzle.run(parts, &mut visitor)?;
@@ -182,7 +184,7 @@ fn run_one(
     puzzle: u32,
     puzzles: &[Puzzle],
     parts: [bool; 2],
-    visitor: impl FnMut(u32, u32, RuntimeStats, String),
+    visitor: impl FnMut(u32, u32, RuntimeStats, String) -> Result<(), AocError>,
 ) -> Result<(), AocError> {
     let puzzle = puzzles
         .get(puzzle as usize)
