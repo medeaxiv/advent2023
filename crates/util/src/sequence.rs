@@ -1,3 +1,5 @@
+use crate::cache::Cache;
+
 pub fn detect_cycle<T>(
     mut next: impl FnMut(&T) -> T,
     ne: impl Fn(&T, &T) -> bool,
@@ -43,5 +45,28 @@ where
         cycle_offset += 1;
     }
 
+    (cycle_length, cycle_offset)
+}
+
+pub fn detect_cycle_cached<T, C>(mut next: impl FnMut() -> T, cache: &mut C) -> (usize, usize)
+where
+    C: Cache<T, usize>,
+{
+    let cycle_offset;
+    let mut counter = 0;
+
+    loop {
+        let entry = next();
+
+        if let Some(&idx) = cache.get(&entry) {
+            cycle_offset = idx;
+            break;
+        }
+
+        cache.insert(entry, counter);
+        counter += 1;
+    }
+
+    let cycle_length = counter - cycle_offset;
     (cycle_length, cycle_offset)
 }
