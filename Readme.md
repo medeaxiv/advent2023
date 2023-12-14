@@ -17,6 +17,7 @@ Arguments:
 Options:
   -p, --part <PART>      Optional part to run
   -r, --rounds <ROUNDS>  Benchmarking rounds [default: 1]
+  -o, --out <PATH>       Optional benchmark report output location
   -h, --help             Print help
 ```
 
