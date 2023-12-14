@@ -38,7 +38,7 @@ where
 }
 
 pub enum RuntimeStats {
-    Single(Duration),
+    Single([Duration; 1]),
     Multiple {
         runs: Vec<Duration>,
         median: Duration,
@@ -48,9 +48,16 @@ pub enum RuntimeStats {
 }
 
 impl RuntimeStats {
+    pub fn runs(&self) -> &[Duration] {
+        match self {
+            Self::Single(duration) => duration.as_slice(),
+            Self::Multiple { runs, .. } => runs.as_slice(),
+        }
+    }
+
     pub fn median(&self) -> Duration {
         match self {
-            Self::Single(duration) => *duration,
+            Self::Single([duration]) => *duration,
             Self::Multiple { median, .. } => *median,
         }
     }
@@ -58,19 +65,20 @@ impl RuntimeStats {
 
 impl From<Duration> for RuntimeStats {
     fn from(value: Duration) -> Self {
-        Self::Single(value)
+        Self::Single([value])
     }
 }
 
 impl From<Vec<Duration>> for RuntimeStats {
-    fn from(mut value: Vec<Duration>) -> Self {
+    fn from(value: Vec<Duration>) -> Self {
         assert!(!value.is_empty());
 
-        value.sort();
+        let mut sorted = value.clone();
+        sorted.sort();
 
-        let median = median(value.as_slice());
-        let min = value[0];
-        let max = value[value.len() - 1];
+        let median = median(sorted.as_slice());
+        let min = sorted[0];
+        let max = sorted[sorted.len() - 1];
 
         Self::Multiple {
             runs: value,
@@ -84,7 +92,7 @@ impl From<Vec<Duration>> for RuntimeStats {
 impl std::fmt::Display for RuntimeStats {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Single(duration) => write!(f, "{}", DurationFormatter(*duration)),
+            Self::Single([duration]) => write!(f, "{}", DurationFormatter(*duration)),
             Self::Multiple {
                 min, max, median, ..
             } => {
