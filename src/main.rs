@@ -1,4 +1,7 @@
-use std::time::{Duration, Instant};
+use std::{
+    path::PathBuf,
+    time::{Duration, Instant},
+};
 
 use benchmark::RuntimeStats;
 use clap::Parser;
@@ -24,6 +27,9 @@ struct Args {
     /// Benchmarking rounds
     #[arg(short = 'r', long = "rounds", default_value_t = 1)]
     rounds: u32,
+    /// Optional benchmark report output location
+    #[arg(short = 'o', long = "out", id = "PATH")]
+    report: Option<PathBuf>,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -134,10 +140,16 @@ fn main() -> anyhow::Result<()> {
 
     let start = Instant::now();
 
+    let mut report = args.report.as_ref().map(|_| Report::default());
+
     let mut sum_of_medians = Duration::ZERO;
     let visitor = |puzzle, part, stats: RuntimeStats, result| {
         println!("Day {puzzle:02} part {part} ({stats}): {result}");
         sum_of_medians += stats.median();
+
+        if let Some(report) = report.as_mut() {
+            report.push_entry(puzzle, part, &stats);
+        }
 
         Ok(())
     };
@@ -157,6 +169,10 @@ fn main() -> anyhow::Result<()> {
 
     println!("Total time: {}", DurationFormatter(total));
 
+    if let Some(report) = report {
+        report.save_to(args.report.unwrap())?;
+    }
+
     Ok(())
 }
 
@@ -165,7 +181,25 @@ pub enum AocError {
     #[error("No puzzle {puzzle}")]
     NoSuchPuzzle { puzzle: u32 },
     #[error(transparent)]
+    Report(csv::Error),
+    #[error(transparent)]
     Io(#[from] std::io::Error),
+}
+
+impl From<csv::Error> for AocError {
+    fn from(value: csv::Error) -> Self {
+        match value.kind() {
+            csv::ErrorKind::Io(_) => {
+                let io = match value.into_kind() {
+                    csv::ErrorKind::Io(io) => io,
+                    _ => unreachable!(),
+                };
+
+                Self::Io(io)
+            }
+            _ => Self::Report(value),
+        }
+    }
 }
 
 fn run_all(
