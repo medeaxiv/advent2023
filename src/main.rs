@@ -7,10 +7,12 @@ use tracing_subscriber::{fmt, prelude::*, EnvFilter};
 use crate::{
     benchmark::{measure, DurationFormatter},
     puzzle::Puzzle,
+    report::Report,
 };
 
 mod benchmark;
 mod puzzle;
+mod report;
 
 #[derive(Parser)]
 struct Args {
