@@ -1,0 +1,22 @@
+[package]
+name = "aoc2023-16"
+authors.workspace = true
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+bitflags.workspace = true
+itertools.workspace = true
+nalgebra.workspace = true
+nom.workspace = true
+nom_locate.workspace = true
+nom-supreme.workspace = true
+num.workspace = true
+rayon.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+aoc-util = { path = "../util" }
+
+[dev-dependencies]
+rstest.workspace = true
