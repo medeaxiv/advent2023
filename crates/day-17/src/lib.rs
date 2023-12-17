@@ -18,16 +18,23 @@ fn solve_part1(input: &str) -> u32 {
         |TraversalPosition { position, .. }| if position == goal { Some(()) } else { None },
         |TraversalPosition { position, .. }| aoc_util::geometry::manhattan_distance(position, goal),
         |_, new| map.get(new.position).unwrap() as i32,
-        [TraversalPosition {
-            position: Pos::zeros(),
-            direction: Direction::Right,
-            steps: 0,
-        }],
+        [
+            TraversalPosition {
+                position: Pos::new(1, 0),
+                direction: Direction::Right,
+                steps: 1,
+            },
+            TraversalPosition {
+                position: Pos::new(0, 1),
+                direction: Direction::Down,
+                steps: 1,
+            },
+        ],
     );
 
     result
         .iter()
-        .flat_map(|(path, _)| path.iter().take(path.len() - 1))
+        .flat_map(|(path, _)| path)
         .map(|TraversalPosition { position, .. }| map.get(*position).unwrap_or(0))
         .sum()
 }
@@ -57,16 +64,23 @@ fn solve_part2(input: &str) -> u32 {
         },
         |TraversalPosition { position, .. }| aoc_util::geometry::manhattan_distance(position, goal),
         |_, new| map.get(new.position).unwrap() as i32,
-        [TraversalPosition {
-            position: Pos::zeros(),
-            direction: Direction::Right,
-            steps: 0,
-        }],
+        [
+            TraversalPosition {
+                position: Pos::new(1, 0),
+                direction: Direction::Right,
+                steps: 1,
+            },
+            TraversalPosition {
+                position: Pos::new(0, 1),
+                direction: Direction::Down,
+                steps: 1,
+            },
+        ],
     );
 
     result
         .iter()
-        .flat_map(|(path, _)| path.iter().take(path.len() - 1))
+        .flat_map(|(path, _)| path)
         .map(|TraversalPosition { position, .. }| map.get(*position).unwrap_or(0))
         .sum()
 }
