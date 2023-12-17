@@ -15,19 +15,20 @@ where
     let mut visited = HashSet::new();
     let mut result = None;
 
-    while result.is_none() && !stack.is_empty() {
-        let (position, depth) = stack.pop().unwrap();
+    while let Some((position, depth)) = stack.pop() {
         result = visit(position, depth);
 
-        if result.is_none() {
-            visited.insert(position);
-            stack.extend(
-                neighbors(position, depth)
-                    .into_iter()
-                    .filter(|n| !visited.contains(n))
-                    .map(|n| (n, depth + 1)),
-            );
+        if result.is_some() {
+            break;
         }
+
+        visited.insert(position);
+        stack.extend(
+            neighbors(position, depth)
+                .into_iter()
+                .filter(|n| !visited.contains(n))
+                .map(|n| (n, depth + 1)),
+        );
     }
 
     result
@@ -44,28 +45,26 @@ where
 {
     let mut stack = Vec::from_iter(start.into_iter().map(|p| (p, p, 0)));
     let mut visited = HashMap::new();
-    let mut result_position = None;
     let mut result = None;
 
-    while result.is_none() && !stack.is_empty() {
-        let (position, previous, depth) = stack.pop().unwrap();
-        result = visit(position, depth);
+    while let Some((position, previous, depth)) = stack.pop() {
+        result = visit(position, depth).map(|result| (result, position));
         visited.insert(position, previous);
 
         if result.is_some() {
-            result_position = Some(position);
-        } else {
-            stack.extend(
-                neighbors(position, depth)
-                    .into_iter()
-                    .filter(|n| !visited.contains_key(n))
-                    .map(|n| (n, position, depth + 1)),
-            );
+            break;
         }
+
+        stack.extend(
+            neighbors(position, depth)
+                .into_iter()
+                .filter(|n| !visited.contains_key(n))
+                .map(|n| (n, position, depth + 1)),
+        );
     }
 
-    result.map(|result| {
-        let path = std::iter::successors(result_position, |position| {
+    result.map(|(result, position)| {
+        let path = std::iter::successors(Some(position), |position| {
             visited.get(position).and_then(|previous| {
                 if position == previous {
                     None
@@ -92,20 +91,20 @@ where
     let mut visited = HashSet::new();
     let mut result = None;
 
-    while result.is_none() && !queue.is_empty() {
-        let (position, depth) = queue.pop_front().unwrap();
+    while let Some((position, depth)) = queue.pop_front() {
         result = visit(position, depth);
 
-        if result.is_none() {
-            visited.insert(position);
-
-            neighbors(position, depth)
-                .into_iter()
-                .filter(|n| !visited.contains(n))
-                .for_each(|n| {
-                    queue.push_back((n, depth + 1));
-                });
+        if result.is_some() {
+            break;
         }
+
+        visited.insert(position);
+        neighbors(position, depth)
+            .into_iter()
+            .filter(|n| !visited.contains(n))
+            .for_each(|n| {
+                queue.push_back((n, depth + 1));
+            });
     }
 
     result
@@ -122,28 +121,26 @@ where
 {
     let mut queue = VecDeque::from_iter(start.into_iter().map(|p| (p, p, 0)));
     let mut visited = HashMap::new();
-    let mut result_position = None;
     let mut result = None;
 
-    while result.is_none() && !queue.is_empty() {
-        let (position, previous, depth) = queue.pop_front().unwrap();
-        result = visit(position, depth);
+    while let Some((position, previous, depth)) = queue.pop_front() {
+        result = visit(position, depth).map(|result| (result, position));
         visited.insert(position, previous);
 
         if result.is_some() {
-            result_position = Some(position);
-        } else {
-            neighbors(position, depth)
-                .into_iter()
-                .filter(|n| !visited.contains_key(n))
-                .for_each(|n| {
-                    queue.push_back((n, position, depth + 1));
-                })
+            break;
         }
+
+        neighbors(position, depth)
+            .into_iter()
+            .filter(|n| !visited.contains_key(n))
+            .for_each(|n| {
+                queue.push_back((n, position, depth + 1));
+            })
     }
 
-    result.map(|result| {
-        let path = std::iter::successors(result_position, |position| {
+    result.map(|(result, position)| {
+        let path = std::iter::successors(Some(position), |position| {
             visited.get(position).and_then(|previous| {
                 if position == previous {
                     None
@@ -220,9 +217,9 @@ mod astar {
             visited.insert(p, (p, C::zero()));
         }
 
-        while result.is_none() && !open_set.is_empty() {
-            // This operation can occur in O(Log(N)) time if open_set is a min-heap or a priority queue
-            let current = open_set.pop().unwrap().0;
+        // This operation can occur in O(Log(N)) time if open_set is a min-heap or a priority queue
+        while let Some(current) = open_set.pop() {
+            let current = current.0;
             result = visit(current).map(|result| (result, current));
             if result.is_some() {
                 break;
