@@ -11,7 +11,7 @@ fn solve_part1(input: &str) -> u32 {
 
     let result = aoc_util::graph::astar(
         |pos| {
-            pos.neighbors()
+            pos.neighbors(1, 3)
                 .filter(|TraversalPosition { position, .. }| map.contains(*position))
                 .collect_vec()
         },
@@ -42,7 +42,7 @@ fn solve_part2(input: &str) -> u32 {
 
     let result = aoc_util::graph::astar(
         |pos| {
-            pos.ultra_neighbors()
+            pos.neighbors(4, 10)
                 .filter(|TraversalPosition { position, .. }| map.contains(*position))
                 .collect_vec()
         },
@@ -79,37 +79,14 @@ struct TraversalPosition {
 }
 
 impl TraversalPosition {
-    pub fn neighbors(&self) -> impl Iterator<Item = Self> + '_ {
-        let forwards = if self.steps < 3 {
+    pub fn neighbors(&self, min_steps: usize, max_steps: usize) -> impl Iterator<Item = Self> + '_ {
+        let forwards = if self.steps < max_steps {
             Some((self.direction, self.steps + 1))
         } else {
             None
         };
 
-        let turns = self
-            .direction
-            .turns()
-            .into_iter()
-            .map(|direction| (direction, 1));
-
-        forwards
-            .into_iter()
-            .chain(turns)
-            .map(|(direction, steps)| Self {
-                position: direction.next(self.position),
-                direction,
-                steps,
-            })
-    }
-
-    pub fn ultra_neighbors(&self) -> impl Iterator<Item = Self> + '_ {
-        let forwards = if self.steps < 10 {
-            Some((self.direction, self.steps + 1))
-        } else {
-            None
-        };
-
-        let turns = if self.steps >= 4 {
+        let turns = if self.steps >= min_steps {
             Some(
                 self.direction
                     .turns()
