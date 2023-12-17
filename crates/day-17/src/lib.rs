@@ -18,11 +18,11 @@ fn solve_part1(input: &str) -> u32 {
         |TraversalPosition { position, .. }| if position == goal { Some(()) } else { None },
         |TraversalPosition { position, .. }| aoc_util::geometry::manhattan_distance(position, goal),
         |_, new| map.get(new.position).unwrap() as i32,
-        TraversalPosition {
+        [TraversalPosition {
             position: Pos::zeros(),
             direction: Direction::Right,
             steps: 0,
-        },
+        }],
     );
 
     result
@@ -57,11 +57,11 @@ fn solve_part2(input: &str) -> u32 {
         },
         |TraversalPosition { position, .. }| aoc_util::geometry::manhattan_distance(position, goal),
         |_, new| map.get(new.position).unwrap() as i32,
-        TraversalPosition {
+        [TraversalPosition {
             position: Pos::zeros(),
             direction: Direction::Right,
             steps: 0,
-        },
+        }],
     );
 
     result

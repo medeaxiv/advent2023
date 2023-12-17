@@ -5,13 +5,13 @@ use itertools::Itertools;
 pub fn depth_first_search<P, N, T>(
     mut neighbors: impl FnMut(P, usize) -> N,
     mut visit: impl FnMut(P, usize) -> Option<T>,
-    start: P,
+    start: impl IntoIterator<Item = P>,
 ) -> Option<T>
 where
     P: Copy + std::hash::Hash + Eq,
     N: IntoIterator<Item = P>,
 {
-    let mut stack = vec![(start, 0)];
+    let mut stack = Vec::from_iter(start.into_iter().map(|p| (p, 0)));
     let mut visited = HashSet::new();
     let mut result = None;
 
@@ -36,13 +36,13 @@ where
 pub fn depth_first_path<P, N, T>(
     mut neighbors: impl FnMut(P, usize) -> N,
     mut visit: impl FnMut(P, usize) -> Option<T>,
-    start: P,
+    start: impl IntoIterator<Item = P>,
 ) -> Option<(Vec<P>, T)>
 where
     P: Copy + std::hash::Hash + Eq,
     N: IntoIterator<Item = P>,
 {
-    let mut stack = vec![(start, start, 0)];
+    let mut stack = Vec::from_iter(start.into_iter().map(|p| (p, p, 0)));
     let mut visited = HashMap::new();
     let mut result_position = None;
     let mut result = None;
@@ -82,13 +82,13 @@ where
 pub fn breadth_first_search<P, N, T>(
     mut neighbors: impl FnMut(P, usize) -> N,
     mut visit: impl FnMut(P, usize) -> Option<T>,
-    start: P,
+    start: impl IntoIterator<Item = P>,
 ) -> Option<T>
 where
     P: Copy + std::hash::Hash + Eq,
     N: IntoIterator<Item = P>,
 {
-    let mut queue = VecDeque::from_iter([(start, 0)]);
+    let mut queue = VecDeque::from_iter(start.into_iter().map(|p| (p, 0)));
     let mut visited = HashSet::new();
     let mut result = None;
 
@@ -114,13 +114,13 @@ where
 pub fn breadth_first_path<P, N, T>(
     mut neighbors: impl FnMut(P, usize) -> N,
     mut visit: impl FnMut(P, usize) -> Option<T>,
-    start: P,
+    start: impl IntoIterator<Item = P>,
 ) -> Option<(Vec<P>, T)>
 where
     P: Copy + std::hash::Hash + Eq,
     N: IntoIterator<Item = P>,
 {
-    let mut queue = VecDeque::from_iter([(start, start, 0)]);
+    let mut queue = VecDeque::from_iter(start.into_iter().map(|p| (p, p, 0)));
     let mut visited = HashMap::new();
     let mut result_position = None;
     let mut result = None;
@@ -195,7 +195,7 @@ mod astar {
         mut visit: impl FnMut(P) -> Option<T>,
         heuristic: impl Fn(P) -> C,
         cost: impl Fn(P, P) -> C,
-        start: P,
+        start: impl IntoIterator<Item = P>,
     ) -> Option<(Vec<P>, T)>
     where
         P: Copy + Eq + std::hash::Hash,
@@ -210,7 +210,6 @@ mod astar {
         // Initially, only the start node is known.
         // This is usually implemented as a min-heap or priority queue rather than a hash-set.
         let mut open_set = BinaryHeap::new();
-        open_set.push(Entry(start, C::zero()));
 
         // For node n, visited[n] is the node immediately preceding it on the cheapest path from the start
         // to n currently known.
@@ -218,7 +217,11 @@ mod astar {
 
         // For node n, node_costs[n] is the cost of the cheapest path from start to n currently known.
         let mut node_costs = HashMap::new();
-        node_costs.insert(start, C::zero());
+
+        for p in start.into_iter() {
+            open_set.push(Entry(p, C::zero()));
+            node_costs.insert(p, C::zero());
+        }
 
         while result.is_none() && !open_set.is_empty() {
             // This operation can occur in O(Log(N)) time if open_set is a min-heap or a priority queue
