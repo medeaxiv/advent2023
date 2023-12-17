@@ -211,16 +211,13 @@ mod astar {
         // This is usually implemented as a min-heap or priority queue rather than a hash-set.
         let mut open_set = BinaryHeap::new();
 
-        // For node n, visited[n] is the node immediately preceding it on the cheapest path from the start
+        // For node n, visited[n] is the node immediately preceding and the cost of the cheapest path from the start
         // to n currently known.
         let mut visited = HashMap::new();
 
-        // For node n, node_costs[n] is the cost of the cheapest path from start to n currently known.
-        let mut node_costs = HashMap::new();
-
         for p in start.into_iter() {
             open_set.push(Entry(p, C::zero()));
-            node_costs.insert(p, C::zero());
+            visited.insert(p, (p, C::zero()));
         }
 
         while result.is_none() && !open_set.is_empty() {
@@ -234,16 +231,15 @@ mod astar {
             for neighbor in neighbors(current) {
                 // cost(current,neighbor) is the weight of the edge from current to neighbor
                 // neighbor_cost is the distance from start to the neighbor through current
-                let neighbor_cost = *node_costs.get(&current).unwrap() + cost(current, neighbor);
+                let neighbor_cost = visited.get(&current).unwrap().1 + cost(current, neighbor);
 
-                if node_costs
+                if visited
                     .get(&neighbor)
-                    .map(|&cost| neighbor_cost < cost)
+                    .map(|&(_, cost)| neighbor_cost < cost)
                     .unwrap_or(true)
                 {
                     // This path to neighbor is better than any previous one. Record it!
-                    visited.insert(neighbor, current);
-                    node_costs.insert(neighbor, neighbor_cost);
+                    visited.insert(neighbor, (current, neighbor_cost));
                     let neighbor_priority = neighbor_cost + heuristic(neighbor);
                     open_set.push(Entry(neighbor, neighbor_priority));
                 }
@@ -252,7 +248,7 @@ mod astar {
 
         result.map(|(result, position)| {
             let path = std::iter::successors(Some(position), |position| {
-                visited.get(position).and_then(|previous| {
+                visited.get(position).and_then(|(previous, _)| {
                     if position == previous {
                         None
                     } else {
