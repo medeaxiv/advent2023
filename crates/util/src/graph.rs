@@ -165,42 +165,42 @@ mod astar {
     use itertools::Itertools;
 
     #[derive(PartialEq, Eq)]
-    struct Entry<P, D>(P, D)
+    struct Entry<P, C>(P, C)
     where
         P: Eq,
-        D: Ord + Eq;
+        C: Ord + Eq;
 
-    impl<P, D> PartialOrd for Entry<P, D>
+    impl<P, C> PartialOrd for Entry<P, C>
     where
         P: Eq,
-        D: Ord + Eq,
+        C: Ord + Eq,
     {
         fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
             Some(self.cmp(other))
         }
     }
 
-    impl<P, D> Ord for Entry<P, D>
+    impl<P, C> Ord for Entry<P, C>
     where
         P: Eq,
-        D: Ord + Eq,
+        C: Ord + Eq,
     {
         fn cmp(&self, other: &Self) -> std::cmp::Ordering {
             other.1.cmp(&self.1)
         }
     }
 
-    pub fn astar<P, N, D, T>(
+    pub fn astar<P, N, C, T>(
         mut neighbors: impl FnMut(P) -> N,
         mut visit: impl FnMut(P) -> Option<T>,
-        heuristic: impl Fn(P) -> D,
-        distance: impl Fn(P, P) -> D,
+        heuristic: impl Fn(P) -> C,
+        cost: impl Fn(P, P) -> C,
         start: P,
     ) -> Option<(Vec<P>, T)>
     where
         P: Copy + Eq + std::hash::Hash,
         N: IntoIterator<Item = P>,
-        D: Copy + Ord + std::ops::Add<D, Output = D> + num::Zero,
+        C: Copy + Ord + std::ops::Add<C, Output = C> + num::Zero,
     {
         // A* search algorithm
         // Adapted from https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
@@ -210,7 +210,7 @@ mod astar {
         // Initially, only the start node is known.
         // This is usually implemented as a min-heap or priority queue rather than a hash-set.
         let mut open_set = BinaryHeap::new();
-        open_set.push(Entry(start, D::zero()));
+        open_set.push(Entry(start, C::zero()));
 
         // For node n, visited[n] is the node immediately preceding it on the cheapest path from the start
         // to n currently known.
@@ -218,7 +218,7 @@ mod astar {
 
         // For node n, node_costs[n] is the cost of the cheapest path from start to n currently known.
         let mut node_costs = HashMap::new();
-        node_costs.insert(start, D::zero());
+        node_costs.insert(start, C::zero());
 
         while result.is_none() && !open_set.is_empty() {
             // This operation can occur in O(Log(N)) time if open_set is a min-heap or a priority queue
@@ -229,10 +229,9 @@ mod astar {
             }
 
             for neighbor in neighbors(current) {
-                // distance(current,neighbor) is the weight of the edge from current to neighbor
+                // cost(current,neighbor) is the weight of the edge from current to neighbor
                 // neighbor_cost is the distance from start to the neighbor through current
-                let neighbor_cost =
-                    *node_costs.get(&current).unwrap() + distance(current, neighbor);
+                let neighbor_cost = *node_costs.get(&current).unwrap() + cost(current, neighbor);
 
                 if node_costs
                     .get(&neighbor)
