@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use nalgebra::Vector2;
 
 pub fn part1(input: &str) -> impl std::fmt::Display {
@@ -13,7 +12,6 @@ fn solve_part1(input: &str) -> u32 {
         |pos| {
             pos.neighbors(1, 3)
                 .filter(|TraversalPosition { position, .. }| map.contains(*position))
-                .collect_vec()
         },
         |TraversalPosition { position, .. }| if position == goal { Some(()) } else { None },
         |TraversalPosition { position, .. }| aoc_util::geometry::manhattan_distance(position, goal),
@@ -51,7 +49,6 @@ fn solve_part2(input: &str) -> u32 {
         |pos| {
             pos.neighbors(4, 10)
                 .filter(|TraversalPosition { position, .. }| map.contains(*position))
-                .collect_vec()
         },
         |TraversalPosition {
              position, steps, ..
@@ -93,32 +90,33 @@ struct TraversalPosition {
 }
 
 impl TraversalPosition {
-    pub fn neighbors(&self, min_steps: usize, max_steps: usize) -> impl Iterator<Item = Self> + '_ {
-        let forwards = if self.steps < max_steps {
-            Some((self.direction, self.steps + 1))
-        } else {
-            None
-        };
-
-        let turns = if self.steps >= min_steps {
-            Some(
-                self.direction
-                    .turns()
-                    .into_iter()
-                    .map(|direction| (direction, 1)),
-            )
-        } else {
-            None
-        };
-
-        forwards
-            .into_iter()
-            .chain(turns.into_iter().flatten())
-            .map(|(direction, steps)| Self {
-                position: direction.next(self.position),
-                direction,
-                steps,
-            })
+    pub fn neighbors(&self, min_steps: usize, max_steps: usize) -> impl Iterator<Item = Self> {
+        let from = *self;
+        Direction::ALL.iter().filter_map(move |&direction| {
+            if direction == from.direction {
+                if from.steps < max_steps {
+                    let neighbor = Self {
+                        position: direction.next(from.position),
+                        direction,
+                        steps: from.steps + 1,
+                    };
+                    Some(neighbor)
+                } else {
+                    None
+                }
+            } else if direction == from.direction.reverse() {
+                None
+            } else if from.steps >= min_steps {
+                let neighbor = Self {
+                    position: direction.next(from.position),
+                    direction,
+                    steps: 1,
+                };
+                Some(neighbor)
+            } else {
+                None
+            }
+        })
     }
 }
 
@@ -133,6 +131,8 @@ enum Direction {
 }
 
 impl Direction {
+    pub const ALL: [Self; 4] = [Self::Up, Self::Down, Self::Left, Self::Right];
+
     pub fn next(&self, position: Pos) -> Pos {
         match self {
             Self::Up => position + Pos::new(0, -1),
@@ -142,10 +142,12 @@ impl Direction {
         }
     }
 
-    pub fn turns(&self) -> [Direction; 2] {
+    pub fn reverse(&self) -> Self {
         match self {
-            Self::Up | Self::Down => [Self::Left, Self::Right],
-            Self::Left | Self::Right => [Self::Up, Self::Down],
+            Self::Up => Self::Down,
+            Self::Down => Self::Up,
+            Self::Left => Self::Right,
+            Self::Right => Self::Left,
         }
     }
 }
