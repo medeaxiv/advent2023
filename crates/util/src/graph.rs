@@ -1,5 +1,6 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::VecDeque;
 
+use ahash::{AHashMap as HashMap, AHashSet as HashSet};
 use itertools::Itertools;
 
 pub fn depth_first_search<P, N, T>(
