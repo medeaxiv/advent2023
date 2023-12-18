@@ -116,6 +116,15 @@ impl<T> Grid<T> {
     }
 }
 
+impl<T> Clone for Grid<T>
+where
+    T: Clone,
+{
+    fn clone(&self) -> Self {
+        Self::new(self.width, self.height, self.entries.clone())
+    }
+}
+
 impl<T> std::fmt::Debug for Grid<T>
 where
     T: TileChar,
@@ -156,6 +165,8 @@ pub enum Direction {
 }
 
 impl Direction {
+    pub const ALL: [Self; 4] = [Self::Up, Self::Down, Self::Left, Self::Right];
+
     pub const fn inverse(&self) -> Self {
         match self {
             Self::Up => Self::Down,
