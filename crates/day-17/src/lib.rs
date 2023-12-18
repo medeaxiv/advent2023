@@ -11,21 +11,20 @@ fn solve_part1(input: &str) -> u32 {
     let result = aoc_util::graph::astar(
         |pos| {
             pos.neighbors(1, 3)
-                .filter(|TraversalPosition { position, .. }| map.contains(position))
+                .filter_map(|pos| map.get(&pos.position).map(|&cost| (pos, cost as usize)))
         },
         |TraversalPosition { position, .. }| if position == goal { Some(()) } else { None },
         |TraversalPosition { position, .. }| aoc_util::geometry::manhattan_distance(position, goal),
-        |_, new| map.get(&new.position).copied().unwrap() as usize,
         [
             TraversalPosition {
                 position: Position::new(1, 0),
                 direction: Direction::Right,
-                steps: 1,
+                steps_since_last_turn: 1,
             },
             TraversalPosition {
                 position: Position::new(0, 1),
                 direction: Direction::Down,
-                steps: 1,
+                steps_since_last_turn: 1,
             },
         ],
     );
@@ -48,10 +47,12 @@ fn solve_part2(input: &str) -> u32 {
     let result = aoc_util::graph::astar(
         |pos| {
             pos.neighbors(4, 10)
-                .filter(|TraversalPosition { position, .. }| map.contains(position))
+                .filter_map(|pos| map.get(&pos.position).map(|&cost| (pos, cost as usize)))
         },
         |TraversalPosition {
-             position, steps, ..
+             position,
+             steps_since_last_turn: steps,
+             ..
          }| {
             if position == goal && steps >= 4 {
                 Some(())
@@ -60,17 +61,16 @@ fn solve_part2(input: &str) -> u32 {
             }
         },
         |TraversalPosition { position, .. }| aoc_util::geometry::manhattan_distance(position, goal),
-        |_, new| map.get(&new.position).copied().unwrap() as usize,
         [
             TraversalPosition {
                 position: Position::new(1, 0),
                 direction: Direction::Right,
-                steps: 1,
+                steps_since_last_turn: 1,
             },
             TraversalPosition {
                 position: Position::new(0, 1),
                 direction: Direction::Down,
-                steps: 1,
+                steps_since_last_turn: 1,
             },
         ],
     );
@@ -86,7 +86,7 @@ fn solve_part2(input: &str) -> u32 {
 struct TraversalPosition {
     position: Position,
     direction: Direction,
-    steps: usize,
+    steps_since_last_turn: usize,
 }
 
 impl TraversalPosition {
@@ -94,11 +94,11 @@ impl TraversalPosition {
         let from = *self;
         Direction::ALL.iter().filter_map(move |&direction| {
             if direction == from.direction {
-                if from.steps < max_steps {
+                if from.steps_since_last_turn < max_steps {
                     let neighbor = Self {
                         position: from.position + direction,
                         direction,
-                        steps: from.steps + 1,
+                        steps_since_last_turn: from.steps_since_last_turn + 1,
                     };
                     Some(neighbor)
                 } else {
@@ -106,11 +106,11 @@ impl TraversalPosition {
                 }
             } else if direction == from.direction.inverse() {
                 None
-            } else if from.steps >= min_steps {
+            } else if from.steps_since_last_turn >= min_steps {
                 let neighbor = Self {
                     position: from.position + direction,
                     direction,
-                    steps: 1,
+                    steps_since_last_turn: 1,
                 };
                 Some(neighbor)
             } else {

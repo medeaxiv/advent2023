@@ -192,25 +192,18 @@ mod astar {
         mut neighbors: impl FnMut(P) -> N,
         mut visit: impl FnMut(P) -> Option<T>,
         heuristic: impl Fn(P) -> C,
-        cost: impl Fn(P, P) -> C,
         start: impl IntoIterator<Item = P>,
     ) -> Option<(Vec<P>, T)>
     where
         P: Copy + Eq + std::hash::Hash,
-        N: IntoIterator<Item = P>,
+        N: IntoIterator<Item = (P, C)>,
         C: Copy + Ord + std::ops::Add<C, Output = C> + num::Zero,
     {
         // A* search algorithm
         // Adapted from https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
 
         let mut result = None;
-        // The set of discovered nodes that may need to be (re-)expanded.
-        // Initially, only the start node is known.
-        // This is usually implemented as a min-heap or priority queue rather than a hash-set.
         let mut open_set = BinaryHeap::new();
-
-        // For node n, visited[n] is the node immediately preceding and the cost of the cheapest path from the start
-        // to n currently known.
         let mut visited = HashMap::new();
 
         for p in start.into_iter() {
@@ -218,7 +211,6 @@ mod astar {
             visited.insert(p, (p, C::zero()));
         }
 
-        // This operation can occur in O(Log(N)) time if open_set is a min-heap or a priority queue
         while let Some(current) = open_set.pop() {
             let current = current.0;
             result = visit(current).map(|result| (result, current));
@@ -226,15 +218,14 @@ mod astar {
                 break;
             }
 
-            for neighbor in neighbors(current) {
-                // cost(current,neighbor) is the weight of the edge from current to neighbor
-                // neighbor_cost is the distance from start to the neighbor through current
-                let neighbor_cost = visited.get(&current).unwrap().1 + cost(current, neighbor);
+            let current_cost = visited.get(&current).map(|&(_, cost)| cost).unwrap();
+
+            for (neighbor, cost) in neighbors(current) {
+                let neighbor_cost = current_cost + cost;
 
                 if visited
                     .get(&neighbor)
-                    .map(|&(_, cost)| neighbor_cost < cost)
-                    .unwrap_or(true)
+                    .map_or(true, |&(_, cost)| neighbor_cost < cost)
                 {
                     // This path to neighbor is better than any previous one. Record it!
                     visited.insert(neighbor, (current, neighbor_cost));
