@@ -10,8 +10,8 @@ fn solve_part1(input: &str) -> u32 {
 
     let result = aoc_util::graph::astar(
         |pos| pos.neighbors(1, 3, &map),
-        |TraversalPosition { position, .. }| if position == goal { Some(()) } else { None },
-        |TraversalPosition { position, .. }| aoc_util::geometry::manhattan_distance(position, goal),
+        |pos| if pos.position == goal { Some(()) } else { None },
+        |pos| aoc_util::geometry::manhattan_distance(pos.position, goal),
         [
             TraversalPosition {
                 position: Position::zeros(),
@@ -43,14 +43,8 @@ fn solve_part2(input: &str) -> u32 {
 
     let result = aoc_util::graph::astar(
         |pos| pos.neighbors(4, 10, &map),
-        |pos| {
-            if pos.position == goal {
-                Some(())
-            } else {
-                None
-            }
-        },
-        |TraversalPosition { position, .. }| aoc_util::geometry::manhattan_distance(position, goal),
+        |pos| if pos.position == goal { Some(()) } else { None },
+        |pos| aoc_util::geometry::manhattan_distance(pos.position, goal),
         [
             TraversalPosition {
                 position: Position::zeros(),
@@ -82,13 +76,14 @@ struct TraversalPosition {
 impl std::hash::Hash for TraversalPosition {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.position.hash(state);
-        self.direction.hash(state);
+        self.direction.orientation().hash(state);
     }
 }
 
 impl PartialEq for TraversalPosition {
     fn eq(&self, other: &Self) -> bool {
-        self.position == other.position && self.direction == other.direction
+        self.position == other.position
+            && self.direction.orientation() == other.direction.orientation()
     }
 }
 

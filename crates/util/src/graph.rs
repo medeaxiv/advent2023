@@ -189,9 +189,9 @@ mod astar {
     }
 
     pub fn astar<P, N, C, T>(
-        mut neighbors: impl FnMut(P) -> N,
-        mut visit: impl FnMut(P) -> Option<T>,
-        heuristic: impl Fn(P) -> C,
+        mut neighbors: impl FnMut(&P) -> N,
+        mut visit: impl FnMut(&P) -> Option<T>,
+        heuristic: impl Fn(&P) -> C,
         start: impl IntoIterator<Item = P>,
     ) -> Option<(Vec<P>, T)>
     where
@@ -213,14 +213,14 @@ mod astar {
 
         while let Some(current) = open_set.pop() {
             let current = current.0;
-            result = visit(current).map(|result| (result, current));
+            result = visit(&current).map(|result| (result, current));
             if result.is_some() {
                 break;
             }
 
             let current_cost = visited.get(&current).map(|&(_, cost)| cost).unwrap();
 
-            for (neighbor, cost) in neighbors(current) {
+            for (neighbor, cost) in neighbors(&current) {
                 let neighbor_cost = current_cost + cost;
 
                 if visited
@@ -229,7 +229,7 @@ mod astar {
                 {
                     // This path to neighbor is better than any previous one. Record it!
                     visited.insert(neighbor, (current, neighbor_cost));
-                    let neighbor_priority = neighbor_cost + heuristic(neighbor);
+                    let neighbor_priority = neighbor_cost + heuristic(&neighbor);
                     open_set.push(Entry(neighbor, neighbor_priority));
                 }
             }

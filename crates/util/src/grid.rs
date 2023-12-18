@@ -253,6 +253,15 @@ impl Direction {
             Self::Right => Self::Down,
         }
     }
+
+    pub const fn orientation(&self) -> Orientation {
+        match self {
+            Self::Up => Orientation::Vertical,
+            Self::Down => Orientation::Vertical,
+            Self::Left => Orientation::Horizontal,
+            Self::Right => Orientation::Horizontal,
+        }
+    }
 }
 
 impl TileChar for Direction {
@@ -281,4 +290,10 @@ impl std::ops::Mul<usize> for Direction {
 pub struct Movement {
     pub direction: Direction,
     pub distance: usize,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Orientation {
+    Horizontal,
+    Vertical,
 }
