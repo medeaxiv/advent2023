@@ -11,7 +11,7 @@ fn solve_part1(input: &str) -> u32 {
     let result = aoc_util::graph::astar(
         |pos| pos.neighbors(1, 3, &map),
         |pos| if pos.position == goal { Some(()) } else { None },
-        |pos| aoc_util::geometry::manhattan_distance(pos.position, goal),
+        |pos| aoc_util::geometry::manhattan_distance(pos.position, goal) as usize,
         [
             TraversalPosition {
                 position: Position::zeros(),
@@ -44,7 +44,7 @@ fn solve_part2(input: &str) -> u32 {
     let result = aoc_util::graph::astar(
         |pos| pos.neighbors(4, 10, &map),
         |pos| if pos.position == goal { Some(()) } else { None },
-        |pos| aoc_util::geometry::manhattan_distance(pos.position, goal),
+        |pos| aoc_util::geometry::manhattan_distance(pos.position, goal) as usize,
         [
             TraversalPosition {
                 position: Position::zeros(),

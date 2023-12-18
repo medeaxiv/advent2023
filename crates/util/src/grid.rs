@@ -1,6 +1,6 @@
 use nalgebra::Vector2;
 
-pub type Position = Vector2<usize>;
+pub type Position = Vector2<isize>;
 
 impl std::ops::AddAssign<Direction> for Position {
     fn add_assign(&mut self, rhs: Direction) {
@@ -34,16 +34,16 @@ impl std::ops::AddAssign<Movement> for Position {
     fn add_assign(&mut self, rhs: Movement) {
         match rhs.direction {
             Direction::Up => {
-                self.y = self.y.wrapping_sub(rhs.distance);
+                self.y = self.y.wrapping_sub(rhs.distance as isize);
             }
             Direction::Down => {
-                self.y = self.y.wrapping_add(rhs.distance);
+                self.y = self.y.wrapping_add(rhs.distance as isize);
             }
             Direction::Left => {
-                self.x = self.x.wrapping_sub(rhs.distance);
+                self.x = self.x.wrapping_sub(rhs.distance as isize);
             }
             Direction::Right => {
-                self.x = self.x.wrapping_add(rhs.distance);
+                self.x = self.x.wrapping_add(rhs.distance as isize);
             }
         }
     }
@@ -90,16 +90,16 @@ impl std::ops::SubAssign<Movement> for Position {
     fn sub_assign(&mut self, rhs: Movement) {
         match rhs.direction {
             Direction::Up => {
-                self.y = self.y.wrapping_add(rhs.distance);
+                self.y = self.y.wrapping_add(rhs.distance as isize);
             }
             Direction::Down => {
-                self.y = self.y.wrapping_sub(rhs.distance);
+                self.y = self.y.wrapping_sub(rhs.distance as isize);
             }
             Direction::Left => {
-                self.x = self.x.wrapping_add(rhs.distance);
+                self.x = self.x.wrapping_add(rhs.distance as isize);
             }
             Direction::Right => {
-                self.x = self.x.wrapping_sub(rhs.distance);
+                self.x = self.x.wrapping_sub(rhs.distance as isize);
             }
         }
     }
@@ -119,8 +119,8 @@ pub trait TileChar {
 }
 
 pub struct Grid<T> {
-    width: usize,
-    height: usize,
+    width: isize,
+    height: isize,
     entries: Vec<T>,
 }
 
@@ -129,8 +129,8 @@ impl<T> Grid<T> {
         assert_eq!(width * height, entries.len());
 
         Self {
-            width,
-            height,
+            width: width as isize,
+            height: height as isize,
             entries,
         }
     }
@@ -143,28 +143,28 @@ impl<T> Grid<T> {
         self.entries.len()
     }
 
-    pub fn width(&self) -> usize {
+    pub fn width(&self) -> isize {
         self.width
     }
 
-    pub fn height(&self) -> usize {
+    pub fn height(&self) -> isize {
         self.height
     }
 
     pub fn contains(&self, position: &Position) -> bool {
-        position.x < self.width && position.y < self.height
+        (0..self.width).contains(&position.x) && (0..self.height).contains(&position.y)
     }
 
     pub fn index(&self, position: &Position) -> Option<usize> {
         if self.contains(position) {
-            Some(position.y * self.width + position.x)
+            Some((position.y * self.width + position.x) as usize)
         } else {
             None
         }
     }
 
     pub fn position(&self, index: usize) -> Position {
-        Position::new(index % self.width, index / self.width)
+        Position::new(index as isize % self.width, index as isize / self.width)
     }
 
     pub fn get(&self, position: &Position) -> Option<&T> {
@@ -189,7 +189,11 @@ where
     T: Clone,
 {
     fn clone(&self) -> Self {
-        Self::new(self.width, self.height, self.entries.clone())
+        Self {
+            width: self.width,
+            height: self.height,
+            entries: self.entries.clone(),
+        }
     }
 }
 
@@ -207,7 +211,7 @@ where
         write!(f, "│")?;
 
         for (idx, tile) in self.entries.iter().enumerate() {
-            if idx > 0 && idx % self.width == 0 {
+            if idx > 0 && idx % self.width as usize == 0 {
                 writeln!(f, "│")?;
                 write!(f, "│")?;
             }
