@@ -9,22 +9,19 @@ fn solve_part1(input: &str) -> u32 {
     let goal = Position::new(map.width() - 1, map.height() - 1);
 
     let result = aoc_util::graph::astar(
-        |pos| {
-            pos.neighbors(1, 3)
-                .filter_map(|pos| map.get(&pos.position).map(|&cost| (pos, cost as usize)))
-        },
+        |pos| pos.neighbors(1, 3, &map),
         |TraversalPosition { position, .. }| if position == goal { Some(()) } else { None },
         |TraversalPosition { position, .. }| aoc_util::geometry::manhattan_distance(position, goal),
         [
             TraversalPosition {
-                position: Position::new(1, 0),
+                position: Position::zeros(),
                 direction: Direction::Right,
-                steps_since_last_turn: 1,
+                cost: 0,
             },
             TraversalPosition {
-                position: Position::new(0, 1),
+                position: Position::zeros(),
                 direction: Direction::Down,
-                steps_since_last_turn: 1,
+                cost: 0,
             },
         ],
     );
@@ -32,7 +29,7 @@ fn solve_part1(input: &str) -> u32 {
     result
         .iter()
         .flat_map(|(path, _)| path)
-        .map(|TraversalPosition { position, .. }| map.get(position).copied().unwrap_or(0) as u32)
+        .map(|TraversalPosition { cost, .. }| *cost as u32)
         .sum()
 }
 
@@ -45,16 +42,9 @@ fn solve_part2(input: &str) -> u32 {
     let goal = Position::new(map.width() - 1, map.height() - 1);
 
     let result = aoc_util::graph::astar(
+        |pos| pos.neighbors(4, 10, &map),
         |pos| {
-            pos.neighbors(4, 10)
-                .filter_map(|pos| map.get(&pos.position).map(|&cost| (pos, cost as usize)))
-        },
-        |TraversalPosition {
-             position,
-             steps_since_last_turn: steps,
-             ..
-         }| {
-            if position == goal && steps >= 4 {
+            if pos.position == goal {
                 Some(())
             } else {
                 None
@@ -63,14 +53,14 @@ fn solve_part2(input: &str) -> u32 {
         |TraversalPosition { position, .. }| aoc_util::geometry::manhattan_distance(position, goal),
         [
             TraversalPosition {
-                position: Position::new(1, 0),
+                position: Position::zeros(),
                 direction: Direction::Right,
-                steps_since_last_turn: 1,
+                cost: 0,
             },
             TraversalPosition {
-                position: Position::new(0, 1),
+                position: Position::zeros(),
                 direction: Direction::Down,
-                steps_since_last_turn: 1,
+                cost: 0,
             },
         ],
     );
@@ -78,45 +68,82 @@ fn solve_part2(input: &str) -> u32 {
     result
         .iter()
         .flat_map(|(path, _)| path)
-        .map(|TraversalPosition { position, .. }| map.get(position).copied().unwrap_or(0) as u32)
+        .map(|TraversalPosition { cost, .. }| *cost as u32)
         .sum()
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy)]
 struct TraversalPosition {
     position: Position,
     direction: Direction,
-    steps_since_last_turn: usize,
+    cost: usize,
 }
 
+impl std::hash::Hash for TraversalPosition {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.position.hash(state);
+        self.direction.hash(state);
+    }
+}
+
+impl PartialEq for TraversalPosition {
+    fn eq(&self, other: &Self) -> bool {
+        self.position == other.position && self.direction == other.direction
+    }
+}
+
+impl Eq for TraversalPosition {}
+
 impl TraversalPosition {
-    pub fn neighbors(&self, min_steps: usize, max_steps: usize) -> impl Iterator<Item = Self> {
-        let from = *self;
-        Direction::ALL.iter().filter_map(move |&direction| {
-            if direction == from.direction {
-                if from.steps_since_last_turn < max_steps {
-                    let neighbor = Self {
-                        position: from.position + direction,
-                        direction,
-                        steps_since_last_turn: from.steps_since_last_turn + 1,
-                    };
-                    Some(neighbor)
-                } else {
-                    None
+    pub fn neighbors(
+        &self,
+        min_steps: usize,
+        max_steps: usize,
+        map: &Map,
+    ) -> impl IntoIterator<Item = (Self, usize)> {
+        let mut neighbors = Vec::new();
+
+        let left_direction = self.direction.turn_left();
+        let right_direction = self.direction.turn_right();
+
+        let mut left_position = self.position;
+        let mut right_position = self.position;
+        let mut left_cost = 0;
+        let mut right_cost = 0;
+
+        for distance in 1..=max_steps {
+            left_position += left_direction;
+            if let Some(&value) = map.get(&left_position) {
+                left_cost += value as usize;
+                if distance >= min_steps {
+                    neighbors.push((
+                        Self {
+                            position: left_position,
+                            direction: left_direction,
+                            cost: left_cost,
+                        },
+                        left_cost,
+                    ));
                 }
-            } else if direction == from.direction.inverse() {
-                None
-            } else if from.steps_since_last_turn >= min_steps {
-                let neighbor = Self {
-                    position: from.position + direction,
-                    direction,
-                    steps_since_last_turn: 1,
-                };
-                Some(neighbor)
-            } else {
-                None
             }
-        })
+
+            right_position += right_direction;
+            if let Some(&value) = map.get(&right_position) {
+                right_cost += value as usize;
+                if distance >= min_steps {
+                    neighbors.push((
+                        Self {
+                            position: right_position,
+                            direction: right_direction,
+                            cost: right_cost,
+                        },
+                        right_cost,
+                    ));
+                }
+            }
+        }
+
+        neighbors
     }
 }
 
