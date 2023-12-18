@@ -176,6 +176,14 @@ impl<T> Grid<T> {
     }
 }
 
+impl<T> std::ops::Index<usize> for Grid<T> {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.entries[index]
+    }
+}
+
 impl<T> Clone for Grid<T>
 where
     T: Clone,
