@@ -30,6 +30,34 @@ impl std::ops::Add<Direction> for Position {
     }
 }
 
+impl std::ops::AddAssign<Movement> for Position {
+    fn add_assign(&mut self, rhs: Movement) {
+        match rhs.direction {
+            Direction::Up => {
+                self.y = self.y.wrapping_sub(rhs.distance);
+            }
+            Direction::Down => {
+                self.y = self.y.wrapping_add(rhs.distance);
+            }
+            Direction::Left => {
+                self.x = self.x.wrapping_sub(rhs.distance);
+            }
+            Direction::Right => {
+                self.x = self.x.wrapping_add(rhs.distance);
+            }
+        }
+    }
+}
+
+impl std::ops::Add<Movement> for Position {
+    type Output = Self;
+
+    fn add(mut self, rhs: Movement) -> Self::Output {
+        self += rhs;
+        self
+    }
+}
+
 impl std::ops::SubAssign<Direction> for Position {
     fn sub_assign(&mut self, rhs: Direction) {
         match rhs {
@@ -53,6 +81,34 @@ impl std::ops::Sub<Direction> for Position {
     type Output = Self;
 
     fn sub(mut self, rhs: Direction) -> Self::Output {
+        self -= rhs;
+        self
+    }
+}
+
+impl std::ops::SubAssign<Movement> for Position {
+    fn sub_assign(&mut self, rhs: Movement) {
+        match rhs.direction {
+            Direction::Up => {
+                self.y = self.y.wrapping_add(rhs.distance);
+            }
+            Direction::Down => {
+                self.y = self.y.wrapping_sub(rhs.distance);
+            }
+            Direction::Left => {
+                self.x = self.x.wrapping_add(rhs.distance);
+            }
+            Direction::Right => {
+                self.x = self.x.wrapping_sub(rhs.distance);
+            }
+        }
+    }
+}
+
+impl std::ops::Sub<Movement> for Position {
+    type Output = Self;
+
+    fn sub(mut self, rhs: Movement) -> Self::Output {
         self -= rhs;
         self
     }
@@ -208,4 +264,21 @@ impl TileChar for Direction {
             Self::Right => '>',
         }
     }
+}
+
+impl std::ops::Mul<usize> for Direction {
+    type Output = Movement;
+
+    fn mul(self, rhs: usize) -> Self::Output {
+        Self::Output {
+            direction: self,
+            distance: rhs,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Movement {
+    pub direction: Direction,
+    pub distance: usize,
 }
