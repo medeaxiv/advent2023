@@ -1,6 +1,6 @@
 use nalgebra::Vector2;
 
-pub type Position = Vector2<isize>;
+pub type Position = Vector2<i64>;
 
 impl std::ops::AddAssign<Direction> for Position {
     fn add_assign(&mut self, rhs: Direction) {
@@ -34,16 +34,16 @@ impl std::ops::AddAssign<Movement> for Position {
     fn add_assign(&mut self, rhs: Movement) {
         match rhs.direction {
             Direction::Up => {
-                self.y = self.y.wrapping_sub(rhs.distance as isize);
+                self.y = self.y.wrapping_sub(rhs.distance as i64);
             }
             Direction::Down => {
-                self.y = self.y.wrapping_add(rhs.distance as isize);
+                self.y = self.y.wrapping_add(rhs.distance as i64);
             }
             Direction::Left => {
-                self.x = self.x.wrapping_sub(rhs.distance as isize);
+                self.x = self.x.wrapping_sub(rhs.distance as i64);
             }
             Direction::Right => {
-                self.x = self.x.wrapping_add(rhs.distance as isize);
+                self.x = self.x.wrapping_add(rhs.distance as i64);
             }
         }
     }
@@ -90,16 +90,16 @@ impl std::ops::SubAssign<Movement> for Position {
     fn sub_assign(&mut self, rhs: Movement) {
         match rhs.direction {
             Direction::Up => {
-                self.y = self.y.wrapping_add(rhs.distance as isize);
+                self.y = self.y.wrapping_add(rhs.distance as i64);
             }
             Direction::Down => {
-                self.y = self.y.wrapping_sub(rhs.distance as isize);
+                self.y = self.y.wrapping_sub(rhs.distance as i64);
             }
             Direction::Left => {
-                self.x = self.x.wrapping_add(rhs.distance as isize);
+                self.x = self.x.wrapping_add(rhs.distance as i64);
             }
             Direction::Right => {
-                self.x = self.x.wrapping_sub(rhs.distance as isize);
+                self.x = self.x.wrapping_sub(rhs.distance as i64);
             }
         }
     }
@@ -118,9 +118,15 @@ pub trait TileChar {
     fn to_char(&self) -> char;
 }
 
+impl TileChar for char {
+    fn to_char(&self) -> char {
+        *self
+    }
+}
+
 pub struct Grid<T> {
-    width: isize,
-    height: isize,
+    width: i64,
+    height: i64,
     entries: Vec<T>,
 }
 
@@ -129,8 +135,8 @@ impl<T> Grid<T> {
         assert_eq!(width * height, entries.len());
 
         Self {
-            width: width as isize,
-            height: height as isize,
+            width: width as i64,
+            height: height as i64,
             entries,
         }
     }
@@ -143,11 +149,11 @@ impl<T> Grid<T> {
         self.entries.len()
     }
 
-    pub fn width(&self) -> isize {
+    pub fn width(&self) -> i64 {
         self.width
     }
 
-    pub fn height(&self) -> isize {
+    pub fn height(&self) -> i64 {
         self.height
     }
 
@@ -164,7 +170,7 @@ impl<T> Grid<T> {
     }
 
     pub fn position(&self, index: usize) -> Position {
-        Position::new(index as isize % self.width, index as isize / self.width)
+        Position::new(index as i64 % self.width, index as i64 / self.width)
     }
 
     pub fn get(&self, position: &Position) -> Option<&T> {
