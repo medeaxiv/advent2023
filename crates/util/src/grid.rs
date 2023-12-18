@@ -95,8 +95,12 @@ impl<T> Grid<T> {
         self.height
     }
 
-    pub fn index(&self, position: Position) -> Option<usize> {
-        if position.x < self.width && position.y < self.height {
+    pub fn contains(&self, position: &Position) -> bool {
+        position.x < self.width && position.y < self.height
+    }
+
+    pub fn index(&self, position: &Position) -> Option<usize> {
+        if self.contains(position) {
             Some(position.y * self.width + position.x)
         } else {
             None
@@ -107,7 +111,7 @@ impl<T> Grid<T> {
         Position::new(index % self.width, index / self.width)
     }
 
-    pub fn get(&self, position: Position) -> Option<&T> {
+    pub fn get(&self, position: &Position) -> Option<&T> {
         self.index(position).and_then(|idx| self.entries.get(idx))
     }
 

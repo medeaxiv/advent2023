@@ -29,7 +29,7 @@ fn count_energized_tiles_from(
 
     loop {
         let stop = beam.advance_to_splitter(contraption, |b| {
-            if let Some(idx) = contraption.index(b.position) {
+            if let Some(idx) = contraption.index(&b.position) {
                 energy[idx] = true;
             }
         });
@@ -92,7 +92,7 @@ impl Beam {
         mut visitor: impl FnMut(&Self),
     ) -> Result<(), BeamStop> {
         let tile = contraption
-            .get(self.position)
+            .get(&self.position)
             .ok_or(BeamStop::OutOfBounds)?;
 
         visitor(self);
