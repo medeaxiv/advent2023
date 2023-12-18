@@ -1,4 +1,4 @@
-use nalgebra::Vector2;
+use aoc_util::grid::*;
 
 pub fn part1(input: &str) -> impl std::fmt::Display {
     solve_part1(input)
@@ -6,24 +6,24 @@ pub fn part1(input: &str) -> impl std::fmt::Display {
 
 fn solve_part1(input: &str) -> u32 {
     let map = parse(input);
-    let goal = Pos::new(map.width as i32 - 1, map.height as i32 - 1);
+    let goal = Position::new(map.width() - 1, map.height() - 1);
 
     let result = aoc_util::graph::astar(
         |pos| {
             pos.neighbors(1, 3)
-                .filter(|TraversalPosition { position, .. }| map.contains(*position))
+                .filter(|TraversalPosition { position, .. }| map.contains(position))
         },
         |TraversalPosition { position, .. }| if position == goal { Some(()) } else { None },
         |TraversalPosition { position, .. }| aoc_util::geometry::manhattan_distance(position, goal),
-        |_, new| map.get(new.position).unwrap() as i32,
+        |_, new| map.get(&new.position).copied().unwrap() as usize,
         [
             TraversalPosition {
-                position: Pos::new(1, 0),
+                position: Position::new(1, 0),
                 direction: Direction::Right,
                 steps: 1,
             },
             TraversalPosition {
-                position: Pos::new(0, 1),
+                position: Position::new(0, 1),
                 direction: Direction::Down,
                 steps: 1,
             },
@@ -33,7 +33,7 @@ fn solve_part1(input: &str) -> u32 {
     result
         .iter()
         .flat_map(|(path, _)| path)
-        .map(|TraversalPosition { position, .. }| map.get(*position).unwrap_or(0))
+        .map(|TraversalPosition { position, .. }| map.get(position).copied().unwrap_or(0) as u32)
         .sum()
 }
 
@@ -43,12 +43,12 @@ pub fn part2(input: &str) -> impl std::fmt::Display {
 
 fn solve_part2(input: &str) -> u32 {
     let map = parse(input);
-    let goal = Pos::new(map.width as i32 - 1, map.height as i32 - 1);
+    let goal = Position::new(map.width() - 1, map.height() - 1);
 
     let result = aoc_util::graph::astar(
         |pos| {
             pos.neighbors(4, 10)
-                .filter(|TraversalPosition { position, .. }| map.contains(*position))
+                .filter(|TraversalPosition { position, .. }| map.contains(position))
         },
         |TraversalPosition {
              position, steps, ..
@@ -60,15 +60,15 @@ fn solve_part2(input: &str) -> u32 {
             }
         },
         |TraversalPosition { position, .. }| aoc_util::geometry::manhattan_distance(position, goal),
-        |_, new| map.get(new.position).unwrap() as i32,
+        |_, new| map.get(&new.position).copied().unwrap() as usize,
         [
             TraversalPosition {
-                position: Pos::new(1, 0),
+                position: Position::new(1, 0),
                 direction: Direction::Right,
                 steps: 1,
             },
             TraversalPosition {
-                position: Pos::new(0, 1),
+                position: Position::new(0, 1),
                 direction: Direction::Down,
                 steps: 1,
             },
@@ -78,13 +78,13 @@ fn solve_part2(input: &str) -> u32 {
     result
         .iter()
         .flat_map(|(path, _)| path)
-        .map(|TraversalPosition { position, .. }| map.get(*position).unwrap_or(0))
+        .map(|TraversalPosition { position, .. }| map.get(position).copied().unwrap_or(0) as u32)
         .sum()
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct TraversalPosition {
-    position: Pos,
+    position: Position,
     direction: Direction,
     steps: usize,
 }
@@ -96,7 +96,7 @@ impl TraversalPosition {
             if direction == from.direction {
                 if from.steps < max_steps {
                     let neighbor = Self {
-                        position: direction.next(from.position),
+                        position: from.position + direction,
                         direction,
                         steps: from.steps + 1,
                     };
@@ -104,11 +104,11 @@ impl TraversalPosition {
                 } else {
                     None
                 }
-            } else if direction == from.direction.reverse() {
+            } else if direction == from.direction.inverse() {
                 None
             } else if from.steps >= min_steps {
                 let neighbor = Self {
-                    position: direction.next(from.position),
+                    position: from.position + direction,
                     direction,
                     steps: 1,
                 };
@@ -120,62 +120,7 @@ impl TraversalPosition {
     }
 }
 
-type Pos = Vector2<i32>;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
-}
-
-impl Direction {
-    pub const ALL: [Self; 4] = [Self::Up, Self::Down, Self::Left, Self::Right];
-
-    pub fn next(&self, position: Pos) -> Pos {
-        match self {
-            Self::Up => position + Pos::new(0, -1),
-            Self::Down => position + Pos::new(0, 1),
-            Self::Left => position + Pos::new(-1, 0),
-            Self::Right => position + Pos::new(1, 0),
-        }
-    }
-
-    pub fn reverse(&self) -> Self {
-        match self {
-            Self::Up => Self::Down,
-            Self::Down => Self::Up,
-            Self::Left => Self::Right,
-            Self::Right => Self::Left,
-        }
-    }
-}
-
-struct Map {
-    width: usize,
-    height: usize,
-    blocks: Vec<u32>,
-}
-
-impl Map {
-    pub fn contains(&self, position: Pos) -> bool {
-        (0..self.width as i32).contains(&position.x)
-            && (0..self.height as i32).contains(&position.y)
-    }
-
-    pub fn index(&self, position: Pos) -> Option<usize> {
-        if self.contains(position) {
-            Some(position.y as usize * self.width + position.x as usize)
-        } else {
-            None
-        }
-    }
-
-    pub fn get(&self, position: Pos) -> Option<u32> {
-        self.index(position).map(|idx| self.blocks[idx])
-    }
-}
+type Map = Grid<u8>;
 
 fn parse(input: &str) -> Map {
     let mut width = 0;
@@ -189,15 +134,11 @@ fn parse(input: &str) -> Map {
         height += 1;
 
         for c in line.chars() {
-            blocks.push(c.to_digit(10).unwrap());
+            blocks.push(c.to_digit(10).unwrap() as u8);
         }
     }
 
-    Map {
-        width,
-        height,
-        blocks,
-    }
+    Map::new(width, height, blocks)
 }
 
 #[cfg(test)]
