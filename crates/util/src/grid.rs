@@ -70,11 +70,29 @@ pub struct Grid<T> {
 
 impl<T> Grid<T> {
     pub fn new(width: usize, height: usize, entries: Vec<T>) -> Self {
+        assert_eq!(width * height, entries.len());
+
         Self {
             width,
             height,
             entries,
         }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.entries.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.entries.len()
+    }
+
+    pub fn width(&self) -> usize {
+        self.width
+    }
+
+    pub fn height(&self) -> usize {
+        self.height
     }
 
     pub fn index(&self, position: Position) -> Option<usize> {

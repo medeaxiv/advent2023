@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use nalgebra::Vector2;
+use aoc_util::grid::*;
 use rayon::prelude::*;
 
 pub fn part1(input: &str) -> impl std::fmt::Display {
@@ -9,15 +9,15 @@ pub fn part1(input: &str) -> impl std::fmt::Display {
 
 fn solve_part1(input: &str) -> usize {
     let contraption = parse(input);
-    count_energized_tiles_from(Pos::zeros(), Direction::Right, &contraption)
+    count_energized_tiles_from(Position::zeros(), Direction::Right, &contraption)
 }
 
 fn count_energized_tiles_from(
-    position: Pos,
+    position: Position,
     direction: Direction,
     contraption: &Contraption,
 ) -> usize {
-    let mut energy = vec![false; contraption.tiles.len()];
+    let mut energy = vec![false; contraption.len()];
 
     let mut beam = Beam {
         position,
@@ -63,12 +63,12 @@ pub fn part2(input: &str) -> impl std::fmt::Display {
 fn solve_part2(input: &str) -> usize {
     let contraption = parse(input);
 
-    let top = (0..contraption.width as i32).map(|x| (Pos::new(x, 0), Direction::Down));
-    let bottom = (0..contraption.width as i32)
-        .map(|x| (Pos::new(x, contraption.height as i32 - 1), Direction::Up));
-    let left = (0..contraption.height as i32).map(|y| (Pos::new(0, y), Direction::Right));
-    let right = (0..contraption.height as i32)
-        .map(|y| (Pos::new(contraption.width as i32 - 1, y), Direction::Left));
+    let top = (0..contraption.width()).map(|x| (Position::new(x, 0), Direction::Down));
+    let bottom = (0..contraption.width())
+        .map(|x| (Position::new(x, contraption.height() - 1), Direction::Up));
+    let left = (0..contraption.height()).map(|y| (Position::new(0, y), Direction::Right));
+    let right = (0..contraption.height())
+        .map(|y| (Position::new(contraption.width() - 1, y), Direction::Left));
 
     top.chain(bottom)
         .chain(left)
@@ -81,7 +81,7 @@ fn solve_part2(input: &str) -> usize {
 
 #[derive(Debug)]
 struct Beam {
-    position: Pos,
+    position: Position,
     direction: Direction,
 }
 
@@ -99,19 +99,19 @@ impl Beam {
 
         match tile {
             Tile::Empty => {
-                self.position = self.direction.next(self.position);
+                self.position += self.direction;
                 Ok(())
             }
             Tile::Mirror(mirror) => {
-                self.direction = self.direction.reflect(mirror);
-                self.position = self.direction.next(self.position);
+                self.direction = mirror.reflect(self.direction);
+                self.position += self.direction;
                 Ok(())
             }
             Tile::Splitter(splitter) => {
-                if let Some(directions) = self.direction.split(splitter) {
+                if let Some(directions) = splitter.split(self.direction) {
                     Err(BeamStop::Splitter(directions))
                 } else {
-                    self.position = self.direction.next(self.position);
+                    self.position += self.direction;
                     Ok(())
                 }
             }
@@ -139,102 +139,7 @@ enum BeamStop {
     Splitter([Direction; 2]),
 }
 
-type Pos = Vector2<i32>;
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
-}
-
-impl Direction {
-    pub fn reflect(&self, mirror: Mirror) -> Self {
-        match (*self, mirror) {
-            (Self::Up, Mirror::Down) => Self::Left,
-            (Self::Up, Mirror::Up) => Self::Right,
-            (Self::Down, Mirror::Down) => Self::Right,
-            (Self::Down, Mirror::Up) => Self::Left,
-            (Self::Left, Mirror::Down) => Self::Up,
-            (Self::Left, Mirror::Up) => Self::Down,
-            (Self::Right, Mirror::Down) => Self::Down,
-            (Self::Right, Mirror::Up) => Self::Up,
-        }
-    }
-
-    pub fn split(&self, splitter: Splitter) -> Option<[Self; 2]> {
-        match (*self, splitter) {
-            (Self::Up, Splitter::Vertical) => None,
-            (Self::Up, Splitter::Horizontal) => Some([Self::Left, Self::Right]),
-            (Self::Down, Splitter::Vertical) => None,
-            (Self::Down, Splitter::Horizontal) => Some([Self::Left, Self::Right]),
-            (Self::Left, Splitter::Vertical) => Some([Self::Up, Self::Down]),
-            (Self::Left, Splitter::Horizontal) => None,
-            (Self::Right, Splitter::Vertical) => Some([Self::Up, Self::Down]),
-            (Self::Right, Splitter::Horizontal) => None,
-        }
-    }
-
-    pub fn next(&self, from: Pos) -> Pos {
-        match self {
-            Self::Up => from + Pos::new(0, -1),
-            Self::Down => from + Pos::new(0, 1),
-            Self::Left => from + Pos::new(-1, 0),
-            Self::Right => from + Pos::new(1, 0),
-        }
-    }
-}
-
-struct Contraption {
-    width: usize,
-    height: usize,
-    tiles: Vec<Tile>,
-}
-
-impl Contraption {
-    pub fn index(&self, position: Pos) -> Option<usize> {
-        if (0..self.width as i32).contains(&position.x)
-            && (0..self.height as i32).contains(&position.y)
-        {
-            Some(position.y as usize * self.width + position.x as usize)
-        } else {
-            None
-        }
-    }
-
-    pub fn get(&self, position: Pos) -> Option<Tile> {
-        self.index(position).map(|idx| self.tiles[idx])
-    }
-}
-
-impl std::fmt::Debug for Contraption {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f)?;
-        write!(f, "+")?;
-        for _ in 0..self.width {
-            write!(f, "-")?;
-        }
-        writeln!(f, "+")?;
-        write!(f, "|")?;
-
-        for (idx, tile) in self.tiles.iter().enumerate() {
-            if idx > 0 && idx % self.width == 0 {
-                writeln!(f, "|")?;
-                write!(f, "|")?;
-            }
-
-            write!(f, "{tile:?}")?;
-        }
-
-        writeln!(f, "|")?;
-        write!(f, "+")?;
-        for _ in 0..self.width {
-            write!(f, "-")?;
-        }
-        writeln!(f, "+")
-    }
-}
+type Contraption = Grid<Tile>;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Tile {
@@ -243,17 +148,15 @@ enum Tile {
     Mirror(Mirror),
 }
 
-impl std::fmt::Debug for Tile {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let c = match self {
+impl TileChar for Tile {
+    fn to_char(&self) -> char {
+        match self {
             Self::Empty => '.',
             Self::Splitter(Splitter::Horizontal) => '-',
             Self::Splitter(Splitter::Vertical) => '|',
             Self::Mirror(Mirror::Down) => '\\',
             Self::Mirror(Mirror::Up) => '/',
-        };
-
-        write!(f, "{c}")
+        }
     }
 }
 
@@ -263,10 +166,40 @@ enum Splitter {
     Horizontal,
 }
 
+impl Splitter {
+    pub fn split(&self, direction: Direction) -> Option<[Direction; 2]> {
+        match (*self, direction) {
+            (Self::Vertical, Direction::Up) => None,
+            (Self::Horizontal, Direction::Up) => Some([Direction::Left, Direction::Right]),
+            (Self::Vertical, Direction::Down) => None,
+            (Self::Horizontal, Direction::Down) => Some([Direction::Left, Direction::Right]),
+            (Self::Vertical, Direction::Left) => Some([Direction::Up, Direction::Down]),
+            (Self::Horizontal, Direction::Left) => None,
+            (Self::Vertical, Direction::Right) => Some([Direction::Up, Direction::Down]),
+            (Self::Horizontal, Direction::Right) => None,
+        }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Mirror {
     Down,
     Up,
+}
+
+impl Mirror {
+    pub fn reflect(&self, direction: Direction) -> Direction {
+        match (*self, direction) {
+            (Self::Down, Direction::Up) => Direction::Left,
+            (Self::Up, Direction::Up) => Direction::Right,
+            (Self::Down, Direction::Down) => Direction::Right,
+            (Self::Up, Direction::Down) => Direction::Left,
+            (Self::Down, Direction::Left) => Direction::Up,
+            (Self::Up, Direction::Left) => Direction::Down,
+            (Self::Down, Direction::Right) => Direction::Down,
+            (Self::Up, Direction::Right) => Direction::Up,
+        }
+    }
 }
 
 fn parse(input: &str) -> Contraption {
@@ -291,11 +224,7 @@ fn parse(input: &str) -> Contraption {
         }
     }
 
-    Contraption {
-        width,
-        height,
-        tiles,
-    }
+    Contraption::new(width, height, tiles)
 }
 
 #[cfg(test)]
