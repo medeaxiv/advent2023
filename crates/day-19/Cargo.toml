@@ -1,5 +1,5 @@
 [package]
-name = "aoc2023-template"
+name = "aoc2023-19"
 authors.workspace = true
 version.workspace = true
 edition.workspace = true
