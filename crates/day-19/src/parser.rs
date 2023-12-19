@@ -86,8 +86,8 @@ fn condition_parser(input: &str) -> IResult<&str, Condition> {
 
 fn destination_parser(input: &str) -> IResult<&str, Destination> {
     map(alpha1, |s| match s {
-        "A" => Destination::Accepted,
-        "R" => Destination::Rejected,
+        "A" => Destination::Terminal(true),
+        "R" => Destination::Terminal(false),
         s => Destination::Workflow(s),
     })(input)
 }
