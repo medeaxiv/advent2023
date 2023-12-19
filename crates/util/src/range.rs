@@ -62,6 +62,7 @@ impl<N> MultiRangeInternal<N>
 where
     N: Eq + Ord + Clone,
 {
+    #[allow(dead_code)]
     pub fn len(&self) -> usize {
         match self {
             Self::Empty => 0,
