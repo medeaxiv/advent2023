@@ -209,6 +209,12 @@ impl<T> std::ops::Index<usize> for Grid<T> {
     }
 }
 
+impl<T> std::ops::IndexMut<usize> for Grid<T> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.entries[index]
+    }
+}
+
 impl<T> Clone for Grid<T>
 where
     T: Clone,
