@@ -177,8 +177,27 @@ impl<T> Grid<T> {
         self.index(position).and_then(|idx| self.entries.get(idx))
     }
 
+    pub fn put(&mut self, position: &Position, tile: T) {
+        if let Some(index) = self.index(position) {
+            self.entries[index] = tile;
+        }
+    }
+
     pub fn iter(&self) -> impl Iterator<Item = &T> {
         self.entries.iter()
+    }
+}
+
+impl<T> Grid<T>
+where
+    T: TileChar,
+{
+    pub fn to_char_grid(&self) -> Grid<char> {
+        Grid {
+            width: self.width,
+            height: self.height,
+            entries: self.entries.iter().map(|t| t.to_char()).collect(),
+        }
     }
 }
 
@@ -225,7 +244,7 @@ where
             write!(f, "{}", tile.to_char())?;
         }
 
-        writeln!(f, "|")?;
+        writeln!(f, "│")?;
         write!(f, "└")?;
         for _ in 0..self.width {
             write!(f, "─")?;
