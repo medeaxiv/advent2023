@@ -16,9 +16,14 @@ where
     P: Clone + std::hash::Hash + Eq,
     N: IntoIterator<Item = P>,
 {
-    let mut stack: Vec<(P, usize)> = Vec::from_iter(start.into_iter().map(|p| (p, 0)));
+    let mut stack = Vec::new();
     let mut visited = HashSet::new();
     let mut result = None;
+
+    for position in start.into_iter() {
+        stack.push((position.clone(), 0));
+        visited.insert(position);
+    }
 
     while let Some((position, depth)) = stack.pop() {
         result = visit(&position, depth);
@@ -27,13 +32,14 @@ where
             break;
         }
 
-        visited.insert(position.clone());
-        stack.extend(
-            neighbors(&position, depth)
-                .into_iter()
-                .filter(|n| !visited.contains(n))
-                .map(|n| (n, depth + 1)),
-        );
+        for neighbor in neighbors(&position, depth).into_iter() {
+            if visited.contains(&neighbor) {
+                continue;
+            }
+
+            visited.insert(neighbor.clone());
+            stack.push((neighbor, depth + 1));
+        }
     }
 
     result
@@ -48,10 +54,14 @@ where
     P: Clone + std::hash::Hash + Eq,
     N: IntoIterator<Item = P>,
 {
-    let mut stack: Vec<(P, P, usize)> =
-        Vec::from_iter(start.into_iter().map(|p| (p.clone(), p, 0)));
+    let mut stack = Vec::new();
     let mut visited = HashMap::new();
     let mut result = None;
+
+    for position in start.into_iter() {
+        stack.push((position.clone(), position.clone(), 0));
+        visited.insert(position.clone(), position);
+    }
 
     while let Some((position, previous, depth)) = stack.pop() {
         result = visit(&position, depth).map(|result| (result, position.clone()));
@@ -61,12 +71,14 @@ where
             break;
         }
 
-        stack.extend(
-            neighbors(&position, depth)
-                .into_iter()
-                .filter(|n| !visited.contains_key(n))
-                .map(|n| (n, position.clone(), depth + 1)),
-        );
+        for neighbor in neighbors(&position, depth).into_iter() {
+            if visited.contains_key(&neighbor) {
+                continue;
+            }
+
+            visited.insert(neighbor.clone(), position.clone());
+            stack.push((neighbor, position.clone(), depth + 1));
+        }
     }
 
     result.map(|(result, position)| {
@@ -93,9 +105,14 @@ where
     P: Clone + std::hash::Hash + Eq,
     N: IntoIterator<Item = P>,
 {
-    let mut queue: VecDeque<(P, usize)> = VecDeque::from_iter(start.into_iter().map(|p| (p, 0)));
+    let mut queue = VecDeque::new();
     let mut visited = HashSet::new();
     let mut result = None;
+
+    for position in start.into_iter() {
+        queue.push_back((position.clone(), 0));
+        visited.insert(position);
+    }
 
     while let Some((position, depth)) = queue.pop_front() {
         result = visit(&position, depth);
@@ -104,13 +121,14 @@ where
             break;
         }
 
-        visited.insert(position.clone());
-        neighbors(&position, depth)
-            .into_iter()
-            .filter(|n| !visited.contains(n))
-            .for_each(|n| {
-                queue.push_back((n, depth + 1));
-            });
+        for neighbor in neighbors(&position, depth).into_iter() {
+            if visited.contains(&neighbor) {
+                continue;
+            }
+
+            visited.insert(neighbor.clone());
+            queue.push_back((neighbor, depth + 1));
+        }
     }
 
     result
@@ -125,10 +143,14 @@ where
     P: Clone + std::hash::Hash + Eq,
     N: IntoIterator<Item = P>,
 {
-    let mut queue: VecDeque<(P, P, usize)> =
-        VecDeque::from_iter(start.into_iter().map(|p| (p.clone(), p, 0)));
+    let mut queue = VecDeque::new();
     let mut visited = HashMap::new();
     let mut result = None;
+
+    for position in start.into_iter() {
+        queue.push_back((position.clone(), position.clone(), 0));
+        visited.insert(position.clone(), position);
+    }
 
     while let Some((position, previous, depth)) = queue.pop_front() {
         result = visit(&position, depth).map(|result| (result, position.clone()));
@@ -138,12 +160,14 @@ where
             break;
         }
 
-        neighbors(&position, depth)
-            .into_iter()
-            .filter(|n| !visited.contains_key(n))
-            .for_each(|n| {
-                queue.push_back((n, position.clone(), depth + 1));
-            })
+        for neighbor in neighbors(&position, depth).into_iter() {
+            if visited.contains_key(&neighbor) {
+                continue;
+            }
+
+            visited.insert(neighbor.clone(), position.clone());
+            queue.push_back((neighbor, position.clone(), depth + 1));
+        }
     }
 
     result.map(|(result, position)| {
