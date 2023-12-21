@@ -204,10 +204,14 @@ fn main() -> anyhow::Result<()> {
 
     let total = start.elapsed();
 
-    println!(
-        "Sum of median solve times: {}",
-        DurationFormatter(sum_of_medians),
-    );
+    if rounds > 1 {
+        println!(
+            "Sum of median solve times: {}",
+            DurationFormatter(sum_of_medians),
+        );
+    } else {
+        println!("Sum of solve times: {}", DurationFormatter(sum_of_medians),);
+    }
 
     println!("Total time: {}", DurationFormatter(total));
 
