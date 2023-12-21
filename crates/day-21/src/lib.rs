@@ -20,15 +20,15 @@ fn solve_part1(input: &str, steps: usize) -> u64 {
                 .filter(|neighbor| matches!(map.get(neighbor), Some(Tile::Garden)))
         },
         |pos, depth| {
+            if depth > steps {
+                return Some(());
+            }
+
             if even_steps == ((pos.x + pos.y) % 2 == start_remainder) {
                 counter += 1;
             }
 
-            if depth > steps {
-                Some(())
-            } else {
-                None
-            }
+            None
         },
         [start],
     );
