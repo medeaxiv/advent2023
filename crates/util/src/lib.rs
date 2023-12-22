@@ -5,4 +5,5 @@ pub mod grid;
 pub mod numerics;
 pub mod range;
 pub mod sequence;
+pub mod test;
 pub mod tree;
