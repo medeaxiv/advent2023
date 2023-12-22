@@ -95,6 +95,7 @@ dependencies = [
  "rstest",
  "thiserror",
  "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -123,6 +124,7 @@ dependencies = [
  "aoc2023-19",
  "aoc2023-20",
  "aoc2023-21",
+ "aoc2023-22",
  "aoc2023-template",
  "clap",
  "csv",
@@ -516,6 +518,26 @@ dependencies = [
 
 [[package]]
 name = "aoc2023-21"
+version = "0.1.0"
+dependencies = [
+ "ahash",
+ "anyhow",
+ "aoc-util",
+ "bitflags",
+ "itertools",
+ "nalgebra",
+ "nom",
+ "nom-supreme",
+ "nom_locate",
+ "num",
+ "rayon",
+ "rstest",
+ "thiserror",
+ "tracing",
+]
+
+[[package]]
+name = "aoc2023-22"
 version = "0.1.0"
 dependencies = [
  "ahash",
