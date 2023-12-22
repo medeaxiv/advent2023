@@ -94,6 +94,7 @@ fn parse(input: &str) -> Result<((Direction, usize), (Direction, usize)), nom::e
 
 #[cfg(test)]
 mod tests {
+    use aoc_util::test::setup_tracing;
     use rstest::rstest;
 
     use super::*;
@@ -116,6 +117,7 @@ U 2 (#7a21e3)
 
     #[test]
     fn test_part1() {
+        setup_tracing();
         let solution = solve_part1(TEST_INPUT);
         assert_eq!(solution, 62);
     }
@@ -138,12 +140,14 @@ U 2 (#000000)
         15
     )]
     fn extras_part1(#[case] input: &str, #[case] expected: u64) {
+        setup_tracing();
         let solution = solve_part1(input);
         assert_eq!(solution, expected);
     }
 
     #[test]
     fn test_part2() {
+        setup_tracing();
         let solution = solve_part2(TEST_INPUT);
         assert_eq!(solution, 952408144115);
     }

@@ -102,18 +102,22 @@ impl<'a> HashMap<'a> {
 
 #[cfg(test)]
 mod tests {
+    use aoc_util::test::setup_tracing;
+
     use super::*;
 
     const TEST_INPUT: &str = "rn=1,cm-,qp=3,cm=2,qp-,pc=4,ot=9,ab=5,pc-,pc=6,ot=7";
 
     #[test]
     fn test_part1() {
+        setup_tracing();
         let solution = solve_part1(TEST_INPUT);
         assert_eq!(solution, 1320);
     }
 
     #[test]
     fn test_part2() {
+        setup_tracing();
         let solution = solve_part2(TEST_INPUT);
         assert_eq!(solution, 145);
     }

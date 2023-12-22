@@ -111,6 +111,7 @@ fn parse(input: &str) -> Schematic {
 
 #[cfg(test)]
 mod tests {
+    use aoc_util::test::setup_tracing;
     use rstest::rstest;
 
     use super::*;
@@ -129,6 +130,7 @@ mod tests {
 
     #[test]
     fn test_part1() {
+        setup_tracing();
         let solution = solve_part1(TEST_INPUT);
         assert_eq!(solution, 4361);
     }
@@ -156,12 +158,14 @@ mod tests {
         925
     )]
     fn extras_part1(#[case] input: &str, #[case] expected: u32) {
+        setup_tracing();
         let solution = solve_part1(input);
         assert_eq!(solution, expected);
     }
 
     #[test]
     fn test_part2() {
+        setup_tracing();
         let solution = solve_part2(TEST_INPUT);
         assert_eq!(solution, 467835);
     }
@@ -189,6 +193,7 @@ mod tests {
         6756
     )]
     fn extras_part2(#[case] input: &str, #[case] expected: u32) {
+        setup_tracing();
         let solution = solve_part2(input);
         assert_eq!(solution, expected);
     }

@@ -178,6 +178,7 @@ fn parse(line: &str) -> Result<(Hand, u64), nom::error::Error<&str>> {
 
 #[cfg(test)]
 mod tests {
+    use aoc_util::test::setup_tracing;
     use rstest::rstest;
 
     use super::*;
@@ -191,12 +192,14 @@ QQQJA 483
 
     #[test]
     fn test_part1() {
+        setup_tracing();
         let solution = solve_part1(TEST_INPUT);
         assert_eq!(solution, 6440);
     }
 
     #[test]
     fn test_part2() {
+        setup_tracing();
         let solution = solve_part2(TEST_INPUT);
         assert_eq!(solution, 5905);
     }
@@ -225,6 +228,7 @@ JJJJ2 41",
         6839
     )]
     fn extras_part2(#[case] input: &str, #[case] expected: u64) {
+        setup_tracing();
         let solution = solve_part2(input);
         assert_eq!(solution, expected);
     }

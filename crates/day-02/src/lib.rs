@@ -74,6 +74,8 @@ struct Game {
 
 #[cfg(test)]
 mod tests {
+    use aoc_util::test::setup_tracing;
+
     use super::*;
 
     const TEST_INPUT: &str = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
@@ -85,12 +87,14 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
 
     #[test]
     fn test_part1() {
+        setup_tracing();
         let solution = solve_part1(TEST_INPUT);
         assert_eq!(solution, 8);
     }
 
     #[test]
     fn test_part2() {
+        setup_tracing();
         let solution = solve_part2(TEST_INPUT);
         assert_eq!(solution, 2286);
     }

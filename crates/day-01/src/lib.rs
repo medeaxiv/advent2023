@@ -58,6 +58,8 @@ fn digit(s: &str) -> u32 {
 
 #[cfg(test)]
 mod tests {
+    use aoc_util::test::setup_tracing;
+
     use super::*;
 
     const TEST_INPUT1: &str = "1abc2
@@ -77,12 +79,14 @@ zoneight234
 
     #[test]
     fn test_part1() {
+        setup_tracing();
         let solution = solve_part1(TEST_INPUT1);
         assert_eq!(solution, 142);
     }
 
     #[test]
     fn test_part2() {
+        setup_tracing();
         let solution = solve_part2(TEST_INPUT2);
         assert_eq!(solution, 281);
     }

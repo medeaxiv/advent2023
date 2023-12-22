@@ -106,6 +106,7 @@ fn parse(input: &str) -> Result<Card, nom::error::Error<&str>> {
 
 #[cfg(test)]
 mod tests {
+    use aoc_util::test::setup_tracing;
     use rstest::rstest;
 
     use super::*;
@@ -120,6 +121,7 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
 
     #[test]
     fn test_part1() {
+        setup_tracing();
         let solution = solve_part1(TEST_INPUT);
         assert_eq!(solution, 13);
     }
@@ -132,6 +134,7 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
     #[case("Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36", 0)]
     #[case("Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11", 0)]
     fn score_part1(#[case] card: &str, #[case] expected: u32) {
+        setup_tracing();
         let card = parse(card).unwrap();
         let score = card.score();
         assert_eq!(score, expected);
@@ -139,6 +142,7 @@ Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11
 
     #[test]
     fn test_part2() {
+        setup_tracing();
         let solution = solve_part2(TEST_INPUT);
         assert_eq!(solution, 30);
     }

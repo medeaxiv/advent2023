@@ -90,6 +90,7 @@ fn parse(input: &str) -> Map {
 
 #[cfg(test)]
 mod tests {
+    use aoc_util::test::setup_tracing;
     use rstest::rstest;
 
     use super::*;
@@ -108,6 +109,7 @@ mod tests {
 
     #[test]
     fn test_part1() {
+        setup_tracing();
         let solution = solve_part1(TEST_INPUT);
         assert_eq!(solution, 374);
     }
@@ -116,6 +118,7 @@ mod tests {
     #[case(10, 1030)]
     #[case(100, 8410)]
     fn test_part2(#[case] expansion: i64, #[case] expected: u64) {
+        setup_tracing();
         let solution = solve_part2(TEST_INPUT, expansion);
         assert_eq!(solution, expected);
     }

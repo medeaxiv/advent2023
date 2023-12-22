@@ -122,6 +122,7 @@ impl Sheet {
 
 #[cfg(test)]
 mod tests {
+    use aoc_util::test::setup_tracing;
     use rstest::rstest;
 
     use super::*;
@@ -132,6 +133,7 @@ Distance:  9  40  200
 
     #[test]
     fn test_part1() {
+        setup_tracing();
         let solution = solve_part1(TEST_INPUT);
         assert_eq!(solution, 288);
     }
@@ -145,12 +147,14 @@ Distance:  9  40  200
         #[case] target_distance: i64,
         #[case] expected: i64,
     ) {
+        setup_tracing();
         let result = winning_charge_time_count(total_time, target_distance);
         assert_eq!(result, expected);
     }
 
     #[test]
     fn test_part2() {
+        setup_tracing();
         let solution = solve_part2(TEST_INPUT);
         assert_eq!(solution, 71503);
     }

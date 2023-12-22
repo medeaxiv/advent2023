@@ -214,6 +214,7 @@ fn parse(input: &str) -> Result<Almanac, nom::error::Error<&str>> {
 
 #[cfg(test)]
 mod tests {
+    use aoc_util::test::setup_tracing;
     use rstest::rstest;
 
     use super::*;
@@ -255,18 +256,21 @@ humidity-to-location map:
 
     #[test]
     fn test_parser() {
+        setup_tracing();
         let solution = parse(TEST_INPUT);
         assert!(solution.is_ok());
     }
 
     #[test]
     fn test_part1() {
+        setup_tracing();
         let solution = solve_part1(TEST_INPUT);
         assert_eq!(solution, 35);
     }
 
     #[test]
     fn test_part2() {
+        setup_tracing();
         let solution = solve_part2(TEST_INPUT);
         assert_eq!(solution, 46);
     }
@@ -289,6 +293,7 @@ humidity-to-location map:
         #[case] range: Range<u64>,
         #[case] expected: RangeMap,
     ) {
+        setup_tracing();
         let result = mapper.map_range(range);
         assert_eq!(result, expected)
     }
@@ -305,6 +310,7 @@ humidity-to-location map:
         #[case] ranges: Vec<Range<u64>>,
         #[case] expected: Vec<Range<u64>>,
     ) {
+        setup_tracing();
         let result = map.map_ranges(ranges.as_slice());
         assert_eq!(result, expected);
     }
