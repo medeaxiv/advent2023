@@ -1,5 +1,7 @@
 use std::collections::{BTreeMap, HashMap};
 
+use ahash::AHashMap;
+
 pub trait Cache<K, V> {
     fn get(&self, key: &K) -> Option<&V>;
     fn insert(&mut self, key: K, value: V);
@@ -18,6 +20,19 @@ impl<K, V> Cache<K, V> for NoCache {
 }
 
 impl<K, V> Cache<K, V> for HashMap<K, V>
+where
+    K: std::hash::Hash + Eq,
+{
+    fn get(&self, key: &K) -> Option<&V> {
+        Self::get(self, key)
+    }
+
+    fn insert(&mut self, key: K, value: V) {
+        Self::insert(self, key, value);
+    }
+}
+
+impl<K, V> Cache<K, V> for AHashMap<K, V>
 where
     K: std::hash::Hash + Eq,
 {
