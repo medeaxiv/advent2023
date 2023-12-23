@@ -89,11 +89,39 @@ pub fn part2(input: &str) -> impl std::fmt::Display {
 fn solve_part2(input: &str) -> u64 {
     let map = parse(input);
     let start = Position::new(1, 0);
+    let end = Position::new(map.width() - 2, map.height() - 1);
     let graph = build_trail_graph2(start, &map);
 
-    let mut max_length = 0;
+    fn max_length(
+        position: Position,
+        end: Position,
+        visited: &mut HashSet<Position>,
+        graph: &HashMap<Position, Vec<(Position, u64)>>,
+    ) -> Option<u64> {
+        if position == end {
+            return Some(0);
+        }
 
-    max_length
+        visited.insert(position);
+        let length = graph
+            .get(&position)
+            .iter()
+            .flat_map(|edges| edges.iter())
+            .filter_map(|edge| {
+                if visited.contains(&edge.0) {
+                    None
+                } else {
+                    max_length(edge.0, end, visited, graph).map(|l| l + edge.1)
+                }
+            })
+            .max();
+        visited.remove(&position);
+
+        length
+    }
+
+    let mut visited = HashSet::new();
+    max_length(start, end, &mut visited, &graph).unwrap_or(0)
 }
 
 fn build_trail_graph2(start: Position, map: &Map) -> HashMap<Position, Vec<(Position, u64)>> {
@@ -205,6 +233,29 @@ fn parse(input: &str) -> Map {
     }
 
     Map::new(width, height, tiles)
+}
+
+#[allow(dead_code)]
+fn print_graph(graph: &HashMap<Position, Vec<(Position, u64)>>) {
+    let mut rendered_edges: HashMap<(Position, Position), u32> = HashMap::new();
+
+    for (node, edges) in graph.iter() {
+        for edge in edges.iter() {
+            if let Some(count) = rendered_edges.get_mut(&(edge.0, *node)) {
+                *count += 1;
+            } else {
+                rendered_edges.insert((*node, edge.0), 1);
+            }
+        }
+    }
+
+    for ((a, b), count) in rendered_edges {
+        if count == 1 {
+            println!("\"{:?}\" -> \"{:?}\"", a, b);
+        } else {
+            println!("\"{:?}\" -> \"{:?}\" [dir=both]", a, b);
+        }
+    }
 }
 
 #[cfg(test)]
