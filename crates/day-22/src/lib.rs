@@ -176,8 +176,6 @@ struct Support {
 
 #[cfg(test)]
 mod tests {
-    use aoc_util::test::setup_tracing;
-
     use super::*;
 
     const TEST_INPUT: &str = "1,0,1~1,2,1
@@ -191,14 +189,12 @@ mod tests {
 
     #[test]
     fn test_part1() {
-        setup_tracing();
         let solution = solve_part1(TEST_INPUT);
         assert_eq!(solution, 5);
     }
 
     #[test]
     fn test_part2() {
-        setup_tracing();
         let solution = solve_part2(TEST_INPUT);
         assert_eq!(solution, 7);
     }

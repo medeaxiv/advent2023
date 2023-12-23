@@ -16,22 +16,18 @@ fn solve_part2(_input: &str) -> &'static str {
 
 #[cfg(test)]
 mod tests {
-    use aoc_util::test::setup_tracing;
-
     use super::*;
 
     const TEST_INPUT: &str = "";
 
     #[test]
     fn test_part1() {
-        setup_tracing();
         let solution = solve_part1(TEST_INPUT);
         assert_eq!(solution, "TODO");
     }
 
     #[test]
     fn test_part2() {
-        setup_tracing();
         let solution = solve_part2(TEST_INPUT);
         assert_eq!(solution, "TODO");
     }

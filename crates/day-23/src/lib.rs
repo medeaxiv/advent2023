@@ -260,8 +260,6 @@ fn print_graph(graph: &HashMap<Position, Vec<(Position, u64)>>) {
 
 #[cfg(test)]
 mod tests {
-    use aoc_util::test::setup_tracing;
-
     use super::*;
 
     const TEST_INPUT: &str = "#.#####################
@@ -291,7 +289,6 @@ mod tests {
 
     #[test]
     fn test_part1() {
-        setup_tracing();
         let solution = solve_part1(TEST_INPUT);
         assert_eq!(solution, 94);
     }

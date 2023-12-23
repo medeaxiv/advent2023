@@ -242,7 +242,6 @@ fn parse(input: &str) -> (Map, Position) {
 
 #[cfg(test)]
 mod tests {
-    use aoc_util::test::setup_tracing;
     use rstest::rstest;
 
     use super::*;
@@ -263,7 +262,6 @@ mod tests {
     #[rstest]
     #[case(TEST_INPUT1, 6, 16)]
     fn test_part1(#[case] input: &str, #[case] steps: usize, #[case] expected: u64) {
-        setup_tracing();
         let solution = solve_part1(input, steps);
         assert_eq!(solution, expected);
     }
@@ -278,7 +276,6 @@ mod tests {
     #[case(TEST_INPUT2, 10, 121)]
     #[case(TEST_INPUT2, 13, 196)]
     fn test_part2(#[case] input: &str, #[case] steps: usize, #[case] expected: u64) {
-        setup_tracing();
         let solution = solve_part2(input, steps);
         assert_eq!(solution, expected);
     }

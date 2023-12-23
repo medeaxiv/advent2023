@@ -152,7 +152,6 @@ fn slice_from<T>(slice: &[T], idx: usize) -> &[T] {
 
 #[cfg(test)]
 mod tests {
-    use aoc_util::test::setup_tracing;
     use rstest::rstest;
 
     use super::*;
@@ -167,7 +166,6 @@ mod tests {
 
     #[test]
     fn test_part1() {
-        setup_tracing();
         let solution = solve_part1(TEST_INPUT);
         assert_eq!(solution, 21);
     }
@@ -190,7 +188,6 @@ mod tests {
     #[case("#?#. 3", true)]
     #[case("#?#. 4", false)]
     fn test_can_fit_length(#[case] input: &str, #[case] expected: bool) {
-        setup_tracing();
         let (springs, pattern) = parse(input);
         let length = pattern[0];
         let solution = can_fit_length(&springs, 0, length);
@@ -205,7 +202,6 @@ mod tests {
     #[case("????.######..#####. 1,6,5", 4)]
     #[case("?###???????? 3,2,1", 10)]
     fn test_part1_single(#[case] line: &str, #[case] expected: usize) {
-        setup_tracing();
         let (springs, pattern) = parse(line);
         let mut cache = NoCache;
         let solution = count_fits(&springs, &pattern, &mut cache);
@@ -214,7 +210,6 @@ mod tests {
 
     #[test]
     fn test_part2() {
-        setup_tracing();
         let solution = solve_part2(TEST_INPUT);
         assert_eq!(solution, 525152);
     }
@@ -227,7 +222,6 @@ mod tests {
     #[case("????.######..#####. 1,6,5", 2500)]
     #[case("?###???????? 3,2,1", 506250)]
     fn test_part2_single(#[case] line: &str, #[case] expected: usize) {
-        setup_tracing();
         let (springs, pattern) = expand(parse(line), PART2_EXPANSION);
         let mut cache = HashMap::new();
         let solution = count_fits(&springs, &pattern, &mut cache);

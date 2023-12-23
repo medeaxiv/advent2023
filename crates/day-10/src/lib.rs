@@ -254,7 +254,6 @@ fn parse(input: &str) -> Sketch {
 
 #[cfg(test)]
 mod tests {
-    use aoc_util::test::setup_tracing;
     use rstest::rstest;
 
     use super::*;
@@ -312,7 +311,6 @@ L7JLJL-JLJLJL--JLJ.L
     #[case(TEST_INPUT1, 4)]
     #[case(TEST_INPUT2, 8)]
     fn test_part1(#[case] input: &str, #[case] expected: u32) {
-        setup_tracing();
         let solution = solve_part1(input);
         assert_eq!(solution, expected);
     }
@@ -322,7 +320,6 @@ L7JLJL-JLJLJL--JLJ.L
     #[case(TEST_INPUT4, 8)]
     #[case(TEST_INPUT5, 10)]
     fn test_part2(#[case] input: &str, #[case] expected: u32) {
-        setup_tracing();
         let solution = solve_part2(input);
         assert_eq!(solution, expected);
     }
