@@ -90,7 +90,8 @@ fn solve_part2(input: &str) -> u64 {
     let map = parse(input);
     let start = Position::new(1, 0);
     let end = Position::new(map.width() - 2, map.height() - 1);
-    let graph = build_trail_graph2(start, &map);
+    let mut graph = build_trail_graph2(start, &map);
+    prune_border_edges(end, &mut graph);
 
     fn max_length(
         position: Position,
@@ -139,7 +140,11 @@ fn build_trail_graph2(start: Position, map: &Map) -> HashMap<Position, Vec<(Posi
             .into_iter()
             .filter(|&d| {
                 let neighbor = position + d;
-                !matches!(map.get(&neighbor), None | Some(Tile::Forest))
+                match map.get(&neighbor) {
+                    None | Some(Tile::Forest) => false,
+                    Some(Tile::Path) => true,
+                    Some(Tile::Slope(slope)) => *slope == d,
+                }
             })
             .collect_vec();
 
@@ -147,12 +152,11 @@ fn build_trail_graph2(start: Position, map: &Map) -> HashMap<Position, Vec<(Posi
             .iter()
             .map(|&direction| walk_along_path(position, direction, map))
         {
-            if neighbor.y == 0 {
-                continue;
-            }
-
             let adjacency = graph.entry(position).or_insert_with(Vec::new);
             adjacency.push((neighbor, distance));
+            let reverse_adjacency = graph.entry(neighbor).or_insert_with(Vec::new);
+            reverse_adjacency.push((position, distance));
+
             if visited.insert(neighbor) {
                 queue.push_back(neighbor);
             }
@@ -160,6 +164,31 @@ fn build_trail_graph2(start: Position, map: &Map) -> HashMap<Position, Vec<(Posi
     }
 
     graph
+}
+
+fn prune_border_edges(end: Position, graph: &mut HashMap<Position, Vec<(Position, u64)>>) {
+    let mut visited = HashSet::from([end]);
+    let mut queue = VecDeque::from([end]);
+    let mut removed = Vec::new();
+
+    while let Some(node) = queue.pop_front() {
+        let neighbors = graph.get(&node).expect("Node should exist");
+        for (idx, (neighbor, _)) in neighbors.iter().enumerate() {
+            if visited.insert(*neighbor)
+                && graph.get(neighbor).expect("Neighbor should exist").len() < 4
+            {
+                // Mark an edge for removal if the node it points to has less than 4 edges
+                // AKA if the node is on the border of the graph
+                removed.push(idx);
+                queue.push_back(*neighbor);
+            }
+        }
+
+        let neighbors = graph.get_mut(&node).expect("Node should exist");
+        for idx in removed.drain(..).rev() {
+            neighbors.swap_remove(idx);
+        }
+    }
 }
 
 fn walk_along_path(mut position: Position, mut direction: Direction, map: &Map) -> (Position, u64) {
