@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use ahash::AHashSet as HashSet;
 
 use aoc_util::grid::*;
 use rayon::prelude::*;

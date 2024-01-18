@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use ahash::AHashSet as HashSet;
 
 use nalgebra::{vector, Vector2};
 

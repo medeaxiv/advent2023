@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use ahash::AHashMap as HashMap;
 
 use aoc_util::cache::{Cache, NoCache};
 use itertools::Itertools;
