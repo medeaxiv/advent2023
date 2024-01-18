@@ -9,7 +9,7 @@ fn solve_part1(input: &str, steps: usize) -> u64 {
 
     let mut even_counter = 0;
     let mut odd_counter = 0;
-    aoc_util::graph::breadth_first_search(
+    aoc_util::graph::search::breadth_first_search(
         |pos, _| {
             let pos = *pos;
             Direction::ALL
@@ -74,7 +74,7 @@ fn solve_part2(input: &str, steps: usize) -> u64 {
 
     let mut even_distance_positions = Vec::with_capacity(map.len() / 2 + 1);
     let mut odd_distance_positions = Vec::with_capacity(map.len() / 2 + 1);
-    aoc_util::graph::breadth_first_search(
+    aoc_util::graph::search::breadth_first_search(
         |pos, _| {
             let pos = *pos;
             Direction::ALL

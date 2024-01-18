@@ -8,7 +8,7 @@ fn solve_part1(input: &str) -> u32 {
     let map = parse(input);
     let goal = Position::new(map.width() - 1, map.height() - 1);
 
-    let result = aoc_util::graph::astar(
+    let result = aoc_util::graph::search::astar(
         |pos| pos.neighbors(1, 3, &map),
         |pos| if pos.position == goal { Some(()) } else { None },
         |pos| aoc_util::geometry::manhattan_distance(pos.position, goal) as usize,
@@ -41,7 +41,7 @@ fn solve_part2(input: &str) -> u32 {
     let map = parse(input);
     let goal = Position::new(map.width() - 1, map.height() - 1);
 
-    let result = aoc_util::graph::astar(
+    let result = aoc_util::graph::search::astar(
         |pos| pos.neighbors(4, 10, &map),
         |pos| if pos.position == goal { Some(()) } else { None },
         |pos| aoc_util::geometry::manhattan_distance(pos.position, goal) as usize,
